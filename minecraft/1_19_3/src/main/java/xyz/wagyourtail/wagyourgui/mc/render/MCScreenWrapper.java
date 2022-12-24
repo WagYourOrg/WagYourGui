@@ -1,4 +1,4 @@
-package xyz.wagyourtail.wagyourgui.render;
+package xyz.wagyourtail.wagyourgui.mc.render;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.network.chat.Component;
@@ -6,20 +6,13 @@ import xyz.wagyourtail.wagyourgui.api.screen.Screen;
 
 public class MCScreenWrapper extends net.minecraft.client.gui.screens.Screen {
     private final Screen screen;
-    private final net.minecraft.client.gui.screens.Screen parent;
 
-    protected MCScreenWrapper(Screen screen, net.minecraft.client.gui.screens.Screen parent) {
+    protected MCScreenWrapper(Screen screen) {
         super(Component.empty());
         this.screen = screen;
-        this.parent = parent;
-        if (parent instanceof MCScreenWrapper) {
-            screen.setParent(((MCScreenWrapper) parent).screen);
-        } else {
-            screen.setParent(parent);
+        if (!screen.isParentGuest()) {
+            screen.setOpenParent(() -> minecraft.setScreen((net.minecraft.client.gui.screens.Screen) screen.getParentHost()));
         }
-        screen.setOpenParent(() -> {
-           minecraft.setScreen(parent);
-        });
     }
 
     public Screen getScreen() {
@@ -38,12 +31,20 @@ public class MCScreenWrapper extends net.minecraft.client.gui.screens.Screen {
 
     @Override
     public boolean mouseClicked(double $$0, double $$1, int $$2) {
-        return screen.onClicked((int) $$0, (int) $$1, $$2);
+        int mods = 0;
+        if (hasShiftDown()) mods |= 1;
+        if (hasControlDown()) mods |= 2;
+        if (hasAltDown()) mods |= 4;
+        return screen.onClicked((int) $$0, (int) $$1, $$2, mods);
     }
 
     @Override
     public boolean mouseReleased(double $$0, double $$1, int $$2) {
-        return screen.onReleased((int) $$0, (int) $$1, $$2);
+        int mods = 0;
+        if (hasShiftDown()) mods |= 1;
+        if (hasControlDown()) mods |= 2;
+        if (hasAltDown()) mods |= 4;
+        return screen.onReleased((int) $$0, (int) $$1, $$2, mods);
     }
 
     @Override

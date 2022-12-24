@@ -1,4 +1,4 @@
-package xyz.wagyourtail.wagyourgui.glfw;
+package xyz.wagyourtail.wagyourgui.standalone.glfw;
 
 import org.lwjgl.glfw.GLFWErrorCallback;
 import org.lwjgl.glfw.GLFWVidMode;
@@ -6,13 +6,13 @@ import org.lwjgl.opengl.GL;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL14;
 import org.lwjgl.system.MemoryStack;
-import xyz.wagyourtail.wagyourgui.Font;
-import xyz.wagyourtail.wagyourgui.elements.DrawableHelper;
-import xyz.wagyourtail.wagyourgui.screens.BaseScreen;
-import xyz.wagyourtail.wagyourgui.screens.EditorMainScreen;
+import xyz.wagyourtail.wagyourgui.api.screen.Screen;
+import xyz.wagyourtail.wagyourgui.standalone.glfw.image.BaseTex;
 
 import java.io.IOException;
 import java.nio.IntBuffer;
+import java.util.HashMap;
+import java.util.Map;
 
 import static org.lwjgl.glfw.GLFW.*;
 import static org.lwjgl.opengl.GL11.*;
@@ -23,12 +23,26 @@ public class GLFWSession implements ResizeListener, MouseListener, KeyListener {
     public Window window;
     public Font font;
     public long fps;
+    public final Map<String, BaseTex> textures = new HashMap<>();
 
-    private BaseScreen screen = new EditorMainScreen(this);
+    private boolean running = false;
 
-    public void start() throws IOException {
+    private Screen screen = new Screen(null);
+
+    public Screen getScreen() {
+        return screen;
+    }
+
+    public boolean isRunning() {
+        return running;
+    }
+
+    public void start(Screen first) throws IOException {
+        this.screen = first;
+        running = true;
         init();
         loop();
+        running = false;
 
         window.shutdown();
         glfwTerminate();
@@ -77,19 +91,19 @@ public class GLFWSession implements ResizeListener, MouseListener, KeyListener {
         // Enable v-sync
         glfwSwapInterval(1);
 
-        font = new Font("demo/UbuntuMono-R.ttf");
+        font = new Font("UbuntuMono-R.ttf");
         window.setVisible(true);
     }
 
-    public void setScreen(BaseScreen screen) {
+    public void setScreen(Screen screen) {
         this.screen = screen;
-        screen.onWindowResize(window);
+        screen.onInit(window.getWidth(), window.getHeight(), false);
     }
 
     public void loop() {
         GL.createCapabilities();
 
-        glClearColor(1.0f, 0.0f, 0.0f, 0.0f);
+        glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
         onWindowResize(window);
 
         window.setupFramebuffer();
@@ -109,7 +123,6 @@ public class GLFWSession implements ResizeListener, MouseListener, KeyListener {
             glPushMatrix();
 
             GL11.glDisable(GL_TEXTURE_2D);
-            DrawableHelper.rect(-1, -1, 1, 1, 0xFF2b2b2b);
 
             glTranslatef(-1, 1, 0f);
             glScalef(2f / window.getWidth(), -2f / window.getHeight(), 1f);
@@ -135,7 +148,7 @@ public class GLFWSession implements ResizeListener, MouseListener, KeyListener {
             double[] cursorY = new double[1];
             glfwGetCursorPos(window.handle, cursorX, cursorY);
 
-            screen.onRender((float) cursorX[0], (float) cursorY[0]);
+            screen.onRender((int) cursorX[0], (int) cursorY[0]);
 
             glPopMatrix();
 
@@ -146,17 +159,26 @@ public class GLFWSession implements ResizeListener, MouseListener, KeyListener {
 
     @Override
     public void onWindowResize(Window window) {
-        screen.onWindowResize(window);
+        screen.onInit(window.getWidth(), window.getHeight(), false);
     }
 
     @Override
     public void onKey(int key, int scancode, int action, int mods) {
-        screen.onKey(key, scancode, action, mods);
+        switch (action) {
+            case 1:
+                screen.onKeyPressed(key, scancode, mods);
+                break;
+            case 0:
+                screen.onKeyReleased(key, scancode, mods);
+                break;
+            case 2:
+                break;
+        }
     }
 
     @Override
-    public void onChar(int codepoint) {
-        screen.onChar(codepoint);
+    public void onChar(int codepoint, int mods) {
+        screen.onCharTyped((char) codepoint, mods);
     }
 
     @Override
@@ -164,17 +186,30 @@ public class GLFWSession implements ResizeListener, MouseListener, KeyListener {
         double[] cursorX = new double[1];
         double[] cursorY = new double[1];
         glfwGetCursorPos(window.handle, cursorX, cursorY);
-        screen.onMouseButton((float) cursorX[0], (float) cursorY[0], button, action, mods);
+        switch (action) {
+            case 1:
+                screen.onClicked((int) cursorX[0], (int) cursorY[0], button, mods);
+                break;
+            case 0:
+                screen.onReleased((int) cursorX[0], (int) cursorY[0], button, mods);
+                break;
+            case 2:
+                break;
+        }
     }
+
+    private final double[] sX = new double[6];
+    private final double[] sY = new double[6];
 
     @Override
     public void onMousePos(double x, double y) {
         for (int i = 0; i < 6; ++i) {
             if (glfwGetMouseButton(window.handle, i) == GLFW_PRESS) {
-                screen.onMouseDrag((float) x, (float) y, i);
+                sX[i] = x;
+                sY[i] = y;
+                screen.onDragged((int) x, (int) y, i, x - sX[i], y - sY[i]);
             }
         }
-        screen.onMousePos((float) x, (float) y);
     }
 
     @Override
@@ -182,6 +217,6 @@ public class GLFWSession implements ResizeListener, MouseListener, KeyListener {
         double[] cursorX = new double[1];
         double[] cursorY = new double[1];
         glfwGetCursorPos(window.handle, cursorX, cursorY);
-        screen.onScroll((float) cursorX[0], (float) cursorY[0], (float) dx, (float) dy);
+        screen.onScrolled((int) cursorX[0], (int) cursorY[0], dy);
     }
 }

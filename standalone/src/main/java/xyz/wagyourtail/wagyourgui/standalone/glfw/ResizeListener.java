@@ -1,4 +1,4 @@
-package xyz.wagyourtail.wagyourgui.glfw;
+package xyz.wagyourtail.wagyourgui.standalone.glfw;
 
 public interface ResizeListener {
 

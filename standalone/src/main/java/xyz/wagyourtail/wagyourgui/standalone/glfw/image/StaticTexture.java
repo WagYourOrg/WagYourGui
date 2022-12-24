@@ -8,15 +8,15 @@ import java.nio.ByteBuffer;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
-public class Texture implements AutoCloseable {
+public class StaticTexture implements BaseTex {
     private final ByteBuffer imageData;
     int[] w = new int[1];
     int[] h = new int[1];
     int[] comp = new int[1];
 
-    private int texid;
+    private int texid = -1;
 
-    public Texture(Path path) throws IOException {
+    public StaticTexture(Path path) throws IOException {
         ByteBuffer data = ByteBuffer.wrap(Files.readAllBytes(path));
 
         if (!STBImage.stbi_info_from_memory(data, w, h, comp)) {
@@ -56,7 +56,7 @@ public class Texture implements AutoCloseable {
     }
 
     public void bind() {
-        if (texid == 0) {
+        if (texid == -1) {
             upload();
         }
 
@@ -66,6 +66,7 @@ public class Texture implements AutoCloseable {
     @Override
     public void close() throws Exception {
         GL11.glDeleteTextures(texid);
+        texid = -1;
     }
 
 }

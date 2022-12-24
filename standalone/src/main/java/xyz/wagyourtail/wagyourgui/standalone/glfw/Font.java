@@ -1,4 +1,4 @@
-package xyz.wagyourtail.wagyourgui.standalone;
+package xyz.wagyourtail.wagyourgui.standalone.glfw;
 
 import org.lwjgl.BufferUtils;
 import org.lwjgl.stb.STBTTAlignedQuad;
@@ -33,7 +33,7 @@ public class Font {
     private final int ascent;
     private final int descent;
     private final int lineGap;
-    public final int FONT_HEIGHT = 16;
+    public final int FONT_HEIGHT = 9;
 
     private STBTTBakedChar.Buffer cdata;
 
@@ -161,7 +161,7 @@ public class Font {
             }
         }
 
-        return width * scale * 2;
+        return width * scale * 3.5f;
     }
 
     public float drawTrimmed(String text, float x, float y, float width) {

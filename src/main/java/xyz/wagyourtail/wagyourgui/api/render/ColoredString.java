@@ -17,7 +17,8 @@ public class ColoredString {
         }
     }
 
-    interface ColoredStringVisitor {
+    @FunctionalInterface
+    public interface ColoredStringVisitor {
         void visit(String string, int color);
     }
 

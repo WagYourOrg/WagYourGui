@@ -1,76 +1,225 @@
-package xyz.wagyourtail.wagyourgui.standalone;
+package xyz.wagyourtail.wagyourgui.standalone.glfw;
 
-import org.lwjgl.opengl.GL11;
+import static org.lwjgl.opengl.GL11.*;
+import static xyz.wagyourtail.wagyourgui.standalone.glfw.GLBuilder.VertexFormat.*;
 
-public class GLBuilder {
-    public static GLBuilder builder = new GLBuilder();
-    public boolean state;
+public abstract class GLBuilder {
+    protected boolean state;
 
-    private GLBuilder() {
-        state = false;
+    public static GLBuilder getImmediate() {
+        return ImmediateBuilder.getInstance();
     }
+
+    public abstract GLBuilder begin(int mode, VertexFormat format);
 
     public GLBuilder begin(int mode) {
-        if (state) throw new IllegalStateException("already began building");
-        GL11.glBegin(mode);
-        state = true;
+        begin(mode, POS_COL);
         return this;
     }
 
-    public GLBuilder vertex(float x, float y) {
-        if (!state) throw new IllegalStateException("not building");
-        GL11.glVertex2f(x, y);
-        return this;
+    public abstract GLBuilder vertex(float x, float y);
+
+    public abstract GLBuilder color(int r, int g, int b, int a);
+
+    public abstract GLBuilder color(float r, float g, float b, float a);
+
+    public abstract GLBuilder color(int rgb, float a);
+
+    public abstract GLBuilder color(int rgba);
+
+    public abstract GLBuilder uv(float u, float v);
+
+    public abstract GLBuilder uv(float u, float v, float w, float h);
+
+    public abstract GLBuilder next();
+
+    public abstract void end();
+
+    public enum VertexFormat {
+        POS_COL,
+        POS_COL_TEX,
+        POS_TEX
     }
 
-    public GLBuilder uv(float u, float v) {
-        if (!state) throw new IllegalStateException("not building");
-        GL11.glTexCoord2f(u, v);
-        return this;
-    }
+    private record Pos(float x, float y) {}
+    private record Col(float r, float g, float b, float a) {}
+    private record Tex(float u, float v) {}
 
-    public GLBuilder uv(float u, float v, float w, float h) {
-        if (!state) throw new IllegalStateException("not building");
-        GL11.glTexCoord2f(u / w, v / h);
-        return this;
-    }
+    public static class ImmediateBuilder extends GLBuilder {
+        private static ImmediateBuilder instance = new ImmediateBuilder();
 
-    public GLBuilder color(int r, int g, int b, int a) {
-        GL11.glColor4f(r/255f, g/255f, b/255f, a/255f);
-        return this;
-    }
+        private ImmediateBuilder() {
+            super();
+        }
 
-    public GLBuilder color(float r, float g, float b, float a) {
-        GL11.glColor4f(r, g, b, a);
-        return this;
-    }
+        public static ImmediateBuilder getInstance() {
+            return instance;
+        }
 
-    public GLBuilder color(int rgb, float a) {
-        int r = (rgb >> 16) & 255;
-        int g = (rgb >> 8) & 255;
-        int b = rgb & 255;
+        private VertexFormat format;
+        private Pos pos;
+        private Col col;
+        private Tex tex;
 
-        GL11.glColor4f(r / 255f, g / 255f, b / 255f, a);
-        return this;
-    }
+        @Override
+        public GLBuilder begin(int mode, VertexFormat format) {
+            if (state) {
+                throw new RuntimeException("already building");
+            }
+            if (format == POS_COL) {
+                glEnable(GL_COLOR);
+                glDisable(GL_TEXTURE_2D);
+            } else if (format == POS_COL_TEX) {
+                glEnable(GL_COLOR);
+                glEnable(GL_TEXTURE_2D);
+            } else if (format == POS_TEX) {
+                glDisable(GL_COLOR);
+                glColor4f(1, 1, 1, 1);
+                glEnable(GL_TEXTURE_2D);
+            }
+            glBegin(mode);
+            this.format = format;
+            state = true;
+            return this;
+        }
 
-    public GLBuilder color(int argb) {
-        int a = (argb >> 24) & 255;
-        int r = (argb >> 16) & 255;
-        int g = (argb >> 8) & 255;
-        int b = argb & 255;
+        @Override
+        public GLBuilder vertex(float x, float y) {
+            if (!state) {
+                throw new RuntimeException("not building");
+            }
+            if (Float.isNaN(x) || Float.isNaN(y)) {
+                throw new RuntimeException("invalid position");
+            }
+            if (pos != null) {
+                throw new RuntimeException("already set position");
+            }
+            pos = new Pos(x, y);
+            return this;
+        }
 
-        GL11.glColor4f(r / 255f, g / 255f, b / 255f, a / 255f);
-        return this;
-    }
+        @Override
+        public GLBuilder color(int r, int g, int b, int a) {
+            if (!state) {
+                glColor4f(r / 255.0f, g / 255.0f, b / 255.0f, a / 255.0f);
+                return this;
+            }
+            if (col != null) {
+                throw new RuntimeException("already set color");
+            }
+            if (format != POS_TEX) {
+                col = new Col(r / 255.0f, g / 255.0f, b / 255.0f, a / 255.0f);
+            } else {
+                throw new RuntimeException("current doesn't support color");
+            }
+            return this;
+        }
 
-    public void end() {
-        if (!state) throw new IllegalStateException("not building");
-        GL11.glEnd();
-        state = false;
-    }
+        @Override
+        public GLBuilder color(float r, float g, float b, float a) {
+            if (!state) {
+                glColor4f(r, g, b, a);
+                return this;
+            }
+            if (col != null) {
+                throw new RuntimeException("already set color");
+            }
+            if (format != POS_TEX) {
+                col = new Col(r, g, b, a);
+            } else {
+                throw new RuntimeException("current doesn't support color");
+            }
+            return this;
+        }
 
-    public static GLBuilder getBuilder() {
-        return builder;
+        @Override
+        public GLBuilder color(int rgb, float a) {
+            int r = (rgb >> 16) & 0xff;
+            int g = (rgb >> 8) & 0xff;
+            int b = rgb & 0xff;
+            color(r, g, b, (int) (a * 255));
+            return this;
+        }
+
+        @Override
+        public GLBuilder color(int argb) {
+            int a = (argb >> 24) & 0xff;
+            int r = (argb >> 16) & 0xff;
+            int g = (argb >> 8) & 0xff;
+            int b = argb & 0xff;
+            color(r, g, b, a);
+            return this;
+        }
+
+        @Override
+        public GLBuilder uv(float u, float v) {
+            if (!state) {
+                throw new RuntimeException("not building");
+            }
+            if (format == POS_COL) {
+                throw new RuntimeException("current doesn't support uv");
+            }
+            if (tex != null) {
+                throw new RuntimeException("already set uv");
+            }
+            tex = new Tex(u, v);
+            return this;
+        }
+
+        @Override
+        public GLBuilder uv(float u, float v, float w, float h) {
+            if (!state) {
+                throw new RuntimeException("not building");
+            }
+            if (format == POS_COL) {
+                throw new RuntimeException("current doesn't support uv");
+            }
+            if (tex != null) {
+                throw new RuntimeException("already set uv");
+            }
+            tex = new Tex(u / w, v / h);
+            return this;
+        }
+
+        @Override
+        public GLBuilder next() {
+            if (!state) {
+                throw new RuntimeException("not building");
+            }
+            if (pos == null) {
+                throw new RuntimeException("no pos");
+            }
+            if (format == POS_COL) {
+                if (col != null) {
+                    glColor4f(col.r(), col.g(), col.b(), col.a());
+                }
+                glVertex2f(pos.x(), pos.y());
+            } else if (format == POS_COL_TEX) {
+                if (col != null) {
+                    glColor4f(col.r(), col.g(), col.b(), col.a());
+                }
+                glTexCoord2f(tex.u(), tex.v());
+                glVertex2f(pos.x(), pos.y());
+            } else if (format == POS_TEX) {
+                glTexCoord2f(tex.u(), tex.v());
+                glVertex2f(pos.x(), pos.y());
+            }
+            pos = null;
+            col = null;
+            tex = null;
+            return this;
+        }
+
+        @Override
+        public void end() {
+            if (!state) {
+                throw new RuntimeException("not building");
+            }
+            if (pos != null || col != null || tex != null) {
+                next();
+            }
+            glEnd();
+            state = false;
+        }
     }
 }

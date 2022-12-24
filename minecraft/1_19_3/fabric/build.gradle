@@ -1,0 +1,11 @@
+
+repositories {
+    maven {
+        name "fabric"
+        url "https://maven.fabricmc.net"
+    }
+}
+
+dependencies {
+    mappings "net.fabricmc:intermediary:${minecraft_version}:v2"
+}

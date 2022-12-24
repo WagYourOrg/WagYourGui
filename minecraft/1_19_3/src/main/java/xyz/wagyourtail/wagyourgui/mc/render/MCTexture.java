@@ -1,4 +1,4 @@
-package xyz.wagyourtail.wagyourgui.render;
+package xyz.wagyourtail.wagyourgui.mc.render;
 
 import net.minecraft.client.renderer.texture.AbstractTexture;
 import net.minecraft.resources.ResourceLocation;

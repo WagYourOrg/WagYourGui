@@ -1,0 +1,123 @@
+plugins {
+    id 'xyz.wagyourtail.unimined' version '0.3.5' apply false
+}
+
+import groovy.json.JsonSlurper
+import groovy.xml.XmlSlurper
+
+def getMCPMappings(vers) {
+    switch (vers) {
+        case "1.12.2":
+            vers = "1.12"
+            break
+        default:
+            break
+    }
+    var url = "https://maven.minecraftforge.net/de/oceanlabs/mcp/versions.json"
+    var json = new JsonSlurper().parseText(new URL(url).text)
+    // {"1.12.2": {"snapshot": ["20190624"], "stable": ["39"]}}
+    var mcp = json[vers]
+    var stable = mcp.stable
+    var snapshot = mcp.snapshot
+    var latest = Collections.max(stable)
+    var latestSnapshot = Collections.max(snapshot)
+
+    return [
+        "stable": "$latest-$vers",
+        "snapshot": "$latestSnapshot-$vers"
+    ]
+}
+
+subprojects {
+    apply plugin: 'java'
+    apply plugin: 'xyz.wagyourtail.unimined'
+
+    archivesBaseName = rootProject.archivesBaseName
+    version = rootProject.version
+    group = rootProject.group
+
+    configurations {
+        include
+    }
+
+    repositories {
+        maven {
+            url "https://maven.minecraftforge.net/"
+            metadataSources {
+                artifact()
+            }
+        }
+        maven {
+            name "fabric"
+            url "https://maven.fabricmc.net/"
+        }
+        maven {
+            name "legacyfabric"
+            url "https://maven.legacyfabric.net/"
+        }
+    }
+
+    var official_mappings = minecraft.minecraft.mcVersionCompare(minecraft_version, "1.14.4") != -1
+    var modern_forge = minecraft.minecraft.mcVersionCompare(minecraft_version, "1.12.2") != -1
+    var legacy_forge = minecraft.minecraft.mcVersionCompare(minecraft_version, "1.7.10") != -1
+    var legacy_fabric = minecraft.minecraft.mcVersionCompare(minecraft_version, "1.2.5") != -1
+
+    var isFabricProject = path.endsWith(":fabric")
+    var isForgeProject = path.endsWith(":forge")
+
+    minecraft {
+        if (isForgeProject) {
+            forge {
+                devFallbackNamespace = "intermediary"
+            }
+        } else if (isFabricProject) {
+            fabric()
+        }
+    }
+
+    var common = path.split(":").length == 3
+
+
+    dependencies {
+        minecraft "net.minecraft:minecraft:${minecraft_version}"
+
+        if (isFabricProject) {
+            fabric "net.fabricmc:fabric-loader:0.14.12"
+        }
+        if (isForgeProject) {
+            forge "net.minecraftforge:forge:${minecraft_version}-${forge_version}"
+        }
+
+        implementation rootProject.sourceSets.main.output
+        if (!common) {
+            include project(":")
+        }
+
+        if (official_mappings) {
+            mappings "net.minecraft:minecraft:${minecraft_version}:client-mappings"
+            mappings "net.fabricmc:intermediary:${minecraft_version}:v2"
+        } else {
+            if (modern_forge) {
+                mappings "de.oceanlabs.mcp:mcp_config:${minecraft_version}@zip"
+                mappings "de.oceanlabs.mcp:mcp_snapshot:${getMCPMappings(minecraft_version)["snapshot"]}@zip"
+            } else if (legacy_forge) {
+                mappings "de.oceanlabs.mcp:mcp:${minecraft_version}:srg@zip"
+                mappings "de.oceanlabs.mcp:mcp_snapshot:${getMCPMappings(minecraft_version)["snapshot"]}@zip"
+            } else {
+                throw new GradleException("Unsupported Minecraft Version: ${minecraft_version}")
+            }
+            if (legacy_fabric) {
+                mappings "net.legacyfabric:intermediary:${minecraft_version}:v2"
+            }
+        }
+    }
+
+    if (common) {
+        minecraft.runs.off = true
+
+        remapJar {
+            targetNamespace = "named"
+            fallbackTargetNamespace = "named"
+        }
+    }
+}

@@ -1,2 +1,66 @@
+import java.nio.file.FileVisitResult
+import java.nio.file.Files
+import java.nio.file.attribute.BasicFileAttributes
+import java.nio.file.FileVisitor
+import java.nio.file.Path
+
+pluginManagement {
+    repositories {
+        maven {
+            name = 'WagYourMaven'
+            url = 'https://maven.wagyourtail.xyz/releases'
+        }
+        maven {
+            name = 'ForgeMaven'
+            url = 'https://maven.minecraftforge.net/'
+        }
+        maven {
+            name = 'FabricMaven'
+            url = 'https://maven.fabricmc.net/'
+        }
+        mavenCentral()
+        gradlePluginPortal()
+    }
+}
+
 rootProject.name = 'WagYourGui'
 
+var current = rootProject.projectDir.toPath()
+
+
+Files.walkFileTree(current, new FileVisitor<Path>() {
+    @Override
+    FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs) throws IOException {
+        return FileVisitResult.CONTINUE
+    }
+
+    @Override
+    FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
+        if (file.getFileName().toString() == "build.gradle") {
+            var f = current.relativize(file.parent)
+            for (int i in 0..f.nameCount-1) {
+                if (f.getName(i).toString().startsWith(".")) {
+                    println "Skipping ${f} because it is hidden"
+                    return FileVisitResult.CONTINUE
+                }
+            }
+            if (f.getName(0).toString() == "" && f.nameCount == 1) {
+                println "Skipping ${f} because it is the root project"
+                return FileVisitResult.CONTINUE
+            }
+            println "Adding project: ${f}"
+            include f.toString().replace("/", ":")
+        }
+        return FileVisitResult.CONTINUE
+    }
+
+    @Override
+    FileVisitResult visitFileFailed(Path file, IOException exc) throws IOException {
+        return FileVisitResult.CONTINUE
+    }
+
+    @Override
+    FileVisitResult postVisitDirectory(Path dir, IOException exc) throws IOException {
+        return FileVisitResult.CONTINUE
+    }
+})

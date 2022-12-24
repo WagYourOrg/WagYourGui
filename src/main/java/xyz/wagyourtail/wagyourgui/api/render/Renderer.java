@@ -2,86 +2,111 @@ package xyz.wagyourtail.wagyourgui.api.render;
 
 import xyz.wagyourtail.wagyourgui.api.screen.Screen;
 
-public interface Renderer {
-    void drawRect(int x, int y, int width, int height, int color);
+public interface Renderer<T extends Texture, M extends MutableTexture> {
+    void rect(int x, int y, int width, int height, int color);
 
-    void drawTexturedRect(int x, int y, int width, int height, int u, int v, int textureWidth, int textureHeight, Texture tex);
+    void texturedRect(int x, int y, int width, int height, int u, int v, int textureWidth, int textureHeight, Texture tex);
+    void texturedRect(int x, int y, int width, int height, int u, int v, int uw, int vh, int textureWidth, int textureHeight, Texture tex);
 
-    void drawTexturedRect(int x, int y, int width, int height, int u, int v, int textureWidth, int textureHeight, Texture tex, int color);
+    void texturedRect(int x, int y, int width, int height, int u, int v, int textureWidth, int textureHeight, Texture tex, int color);
+    void texturedRect(int x, int y, int width, int height, int u, int v, int uw, int vh, int textureWidth, int textureHeight, Texture tex, int color);
 
-    void drawString(String text, int x, int y, int color);
+    void string(String text, int x, int y, int color);
 
-    void drawString(String text, int x, int y, int color, boolean shadow);
+    void string(String text, int x, int y, int color, boolean shadow);
 
-    void drawCenteredString(String text, int x, int y, int color);
+    void centeredString(String text, int x, int y, int color);
 
-    void drawCenteredString(String text, int x, int y, int color, boolean shadow);
+    void centeredString(String text, int x, int y, int color, boolean shadow);
 
-    void drawRightString(String text, int x, int y, int color);
+    void rightString(String text, int x, int y, int color);
 
-    void drawRightString(String text, int x, int y, int color, boolean shadow);
+    void rightString(String text, int x, int y, int color, boolean shadow);
 
     int getStringWidth(String text);
 
+    int getStringWidth(ColoredString text);
+
     int getStringHeight();
 
-    void drawStringTrimmed(String text, int x, int y, int color, int width);
+    void stringTrimmed(String text, int x, int y, int width, int color);
 
-    void drawStringTrimmed(String text, int x, int y, int color, int width, boolean shadow);
+    void stringTrimmed(String text, int x, int y, int width, int color, boolean shadow);
 
-    void drawCenteredStringTrimmed(String text, int x, int y, int color, int width);
+    void centeredStringTrimmed(String text, int x, int y, int width, int color);
 
-    void drawCenteredStringTrimmed(String text, int x, int y, int color, int width, boolean shadow);
+    void centeredStringTrimmed(String text, int x, int y, int width, int color, boolean shadow);
 
-    void drawRightStringTrimmed(String text, int x, int y, int color, int width);
+    void rightStringTrimmed(String text, int x, int y, int width, int color);
 
-    void drawRightStringTrimmed(String text, int x, int y, int color, int width, boolean shadow);
+    void rightStringTrimmed(String text, int x, int y, int width, int color, boolean shadow);
 
-    void drawColoredString(ColoredString text, int x, int y);
+    void coloredString(ColoredString text, int x, int y);
 
-    void drawColoredString(ColoredString text, int x, int y, boolean shadow);
+    void coloredString(ColoredString text, int x, int y, boolean shadow);
 
-    void drawCenteredColoredString(ColoredString text, int x, int y);
+    void centeredColoredString(ColoredString text, int x, int y);
 
-    void drawCenteredColoredString(ColoredString text, int x, int y, boolean shadow);
+    void centeredColoredString(ColoredString text, int x, int y, boolean shadow);
 
-    void drawRightColoredString(ColoredString text, int x, int y);
+    void rightColoredString(ColoredString text, int x, int y);
 
-    void drawRightColoredString(ColoredString text, int x, int y, boolean shadow);
+    void rightColoredString(ColoredString text, int x, int y, boolean shadow);
 
-    void drawColoredStringTrimmed(ColoredString text, int x, int y, int width);
+    void coloredStringTrimmed(ColoredString text, int x, int y, int width);
 
-    void drawColoredStringTrimmed(ColoredString text, int x, int y, int width, boolean shadow);
+    void coloredStringTrimmed(ColoredString text, int x, int y, int width, boolean shadow);
 
-    void drawCenteredColoredStringTrimmed(ColoredString text, int x, int y, int width);
+    void centeredColoredStringTrimmed(ColoredString text, int x, int y, int width);
 
-    void drawCenteredColoredStringTrimmed(ColoredString text, int x, int y, int width, boolean shadow);
+    void centeredColoredStringTrimmed(ColoredString text, int x, int y, int width, boolean shadow);
 
-    void drawRightColoredStringTrimmed(ColoredString text, int x, int y, int width);
+    void rightColoredStringTrimmed(ColoredString text, int x, int y, int width);
 
-    void drawRightColoredStringTrimmed(ColoredString text, int x, int y, int width, boolean shadow);
+    void rightColoredStringTrimmed(ColoredString text, int x, int y, int width, boolean shadow);
 
-    void drawLine(int x1, int y1, int x2, int y2, int color);
+    String trimToWidth(String text, int width);
 
-    void drawGradientRect(int x, int y, int width, int height, int color1, int color2);
+    default ColoredString trimToWidth(ColoredString text, int width) {
+        ColoredString trimmed = new ColoredString();
+        int[] curWidth = {0};
+        boolean[] done = {false};
+        text.visit((s, c) -> {
+            if (done[0]) return;
+            if (curWidth[0] + getStringWidth(s) <= width) {
+                trimmed.append(s, c);
+                curWidth[0] += getStringWidth(s);
+            } else {
+                String trim = trimToWidth(s, width - curWidth[0]);
+                if (trim.length() > 0) {
+                    trimmed.append(trim, c);
+                    curWidth[0] += getStringWidth(trim);
+                    done[0] = true;
+                }
+            }
+        });
+        return trimmed;
+    }
 
-    void drawTriangle(int x1, int y1, int x2, int y2, int x3, int y3, int color);
+    void line(int x1, int y1, int x2, int y2, int color);
 
-    void drawTexturedTriangle(int x1, int y1, int x2, int y2, int x3, int y3, int u1, int v1, int u2, int v2, int u3, int v3, int textureWidth, int textureHeight, Texture tex);
+    void line(int x1, int y1, int x2, int y2, int color, int thickness);
 
-    void drawCircle(int x, int y, int radius, int color);
+    void gradientRect(int x, int y, int width, int height, int color1, int color2);
 
-    void drawTexturedCircle(int x, int y, int radius, int u, int v, int tRadius, int textureWidth, int textureHeight, Texture tex);
+    T getTexture(String identifier);
 
-    Texture getTexture(String identifier);
+    M createMutableTexture(String identifier, int width, int height);
 
-    MutableTexture createMutableTexture(int width, int height);
-
-    MutableTexture createMutableTexture(Texture image);
+    M createMutableTexture(String identifier, Texture image);
 
     void openScreen(Screen screen);
 
     void closeScreen();
 
-    Screen getCurrentScreen();
+    Screen getCurrentGuestScreen();
+
+    Object getCurrentHostScreen();
+
+    boolean isGuestScreen();
 }

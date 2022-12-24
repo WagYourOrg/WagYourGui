@@ -1,19 +1,40 @@
 package xyz.wagyourtail.wagyourgui.api.element;
 
 public interface Interactable {
-    default void onClicked(int mouseX, int mouseY, int button) {}
+    default boolean shouldFocus(int x, int y) {
+        return ((Element) this).isWithinBounds(x, y) && isEnabled();
+    }
+    default boolean onClicked(int mouseX, int mouseY, int button, int mods) {
+        return false;
+    }
 
-    default void onReleased(int mouseX, int mouseY, int button) {}
+    default boolean onReleased(int mouseX, int mouseY, int button, int mods) {
+        return false;
+    }
 
-    default void onDragged(int mouseX, int mouseY, int button, double deltaX, double deltaY) {}
+    default boolean onDragged(int mouseX, int mouseY, int button, double deltaX, double deltaY) {
+        return false;
+    }
 
-    default void onScrolled(int mouseX, int mouseY, double scroll) {}
+    default boolean onScrolled(int mouseX, int mouseY, double scroll) {
+        return false;
+    }
 
-    default void onCharTyped(char character, int keyCode) {}
+    default boolean onCharTyped(char character, int mods) {
+        return false;
+    }
 
-    default void onKeyPressed(int keyCode, int scanCode, int modifiers) {}
+    default boolean onKeyPressed(int keyCode, int scanCode, int modifiers) {
+        return false;
+    }
 
-    default void onKeyReleased(int keyCode, int scanCode, int modifiers) {}
+    default boolean onKeyReleased(int keyCode, int scanCode, int modifiers) {
+        return false;
+    }
 
     default void onFocused(boolean focused) {}
+
+    void setEnabled(boolean enabled);
+
+    boolean isEnabled();
 }

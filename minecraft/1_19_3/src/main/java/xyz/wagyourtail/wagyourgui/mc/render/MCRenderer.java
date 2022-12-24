@@ -1,13 +1,15 @@
-package xyz.wagyourtail.wagyourgui.render;
+package xyz.wagyourtail.wagyourgui.mc.render;
 
 import com.mojang.blaze3d.platform.NativeImage;
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.vertex.*;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiComponent;
+import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.renderer.texture.AbstractTexture;
 import net.minecraft.client.renderer.texture.DynamicTexture;
 import net.minecraft.resources.ResourceLocation;
+import org.joml.Matrix4f;
 import org.joml.Quaternionf;
 import xyz.wagyourtail.wagyourgui.api.render.ColoredString;
 import xyz.wagyourtail.wagyourgui.api.render.Renderer;
@@ -40,9 +42,60 @@ public class MCRenderer extends GuiComponent implements Renderer<MCTexture<Abstr
     }
 
     @Override
+    public void texturedRect(int x, int y, int width, int height, int u, int v, int uw, int vh, int textureWidth, int textureHeight, Texture tex) {
+        RenderSystem.setShaderTexture(0, ((MCTexture) tex).location);
+        blit(pose, x, y, width, height, u, v, uw, vh, textureWidth, textureHeight);
+    }
+
+    @Override
     public void texturedRect(int x, int y, int width, int height, int u, int v, int textureWidth, int textureHeight, Texture tex, int color) {
         RenderSystem.setShaderTexture(0, ((MCTexture) tex).location);
-        blit(pose, x, y, u, v, width, height, textureWidth, textureHeight, color);
+
+        Matrix4f matrix = pose.last().pose();
+        int x1 = x;
+        int y1 = y;
+        int x2 = x + width;
+        int y2 = y + height;
+
+        float u1 = (float) u / (float) textureWidth;
+        float v1 = (float) v / (float) textureHeight;
+        float u2 = (float) (u + width) / (float) textureWidth;
+        float v2 = (float) (v + height) / (float) textureHeight;
+
+        RenderSystem.setShader(GameRenderer::getPositionTexShader);
+        BufferBuilder $$10 = Tesselator.getInstance().getBuilder();
+        $$10.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_COLOR_TEX);
+        $$10.vertex(matrix, (float)x1, (float)y2, 0).color(color).uv(u1, v2).endVertex();
+        $$10.vertex(matrix, (float)x2, (float)y2, 0).color(color).uv(u2, v2).endVertex();
+        $$10.vertex(matrix, (float)x2, (float)y1, 0).color(color).uv(u2, v1).endVertex();
+        $$10.vertex(matrix, (float)x1, (float)y1, 0).color(color).uv(u1, v1).endVertex();
+        BufferUploader.drawWithShader($$10.end());
+    }
+
+    @Override
+    public void texturedRect(int x, int y, int width, int height, int u, int v, int uw, int vh, int textureWidth, int textureHeight, Texture tex, int color) {
+        RenderSystem.setShaderTexture(0, ((MCTexture) tex).location);
+
+        Matrix4f matrix = pose.last().pose();
+
+        int x1 = x;
+        int y1 = y;
+        int x2 = x + width;
+        int y2 = y + height;
+
+        float u1 = (float) u / (float) textureWidth;
+        float v1 = (float) v / (float) textureHeight;
+        float u2 = (float) (u + uw) / (float) textureWidth;
+        float v2 = (float) (v + vh) / (float) textureHeight;
+
+        RenderSystem.setShader(GameRenderer::getPositionTexShader);
+        BufferBuilder $$10 = Tesselator.getInstance().getBuilder();
+        $$10.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_COLOR_TEX);
+        $$10.vertex(matrix, (float)x1, (float)y2, 0).color(color).uv(u1, v2).endVertex();
+        $$10.vertex(matrix, (float)x2, (float)y2, 0).color(color).uv(u2, v2).endVertex();
+        $$10.vertex(matrix, (float)x2, (float)y1, 0).color(color).uv(u2, v1).endVertex();
+        $$10.vertex(matrix, (float)x1, (float)y1, 0).color(color).uv(u1, v1).endVertex();
+        BufferUploader.drawWithShader($$10.end());
     }
 
     @Override
@@ -93,32 +146,32 @@ public class MCRenderer extends GuiComponent implements Renderer<MCTexture<Abstr
     }
 
     @Override
-    public void stringTrimmed(String text, int x, int y, int color, int width) {
-        stringTrimmed(text, x, y, color, width, false);
+    public void stringTrimmed(String text, int x, int y, int width, int color) {
+        stringTrimmed(text, x, y, width, color, false);
     }
 
     @Override
-    public void stringTrimmed(String text, int x, int y, int color, int width, boolean shadow) {
+    public void stringTrimmed(String text, int x, int y, int width, int color, boolean shadow) {
         mc.font.drawShadow(pose, mc.font.plainSubstrByWidth(text, width), x, y, color, shadow);
     }
 
     @Override
-    public void centeredStringTrimmed(String text, int x, int y, int color, int width) {
-        centeredStringTrimmed(text, x, y, color, width, false);
+    public void centeredStringTrimmed(String text, int x, int y, int width, int color) {
+        centeredStringTrimmed(text, x, y, width, color, false);
     }
 
     @Override
-    public void centeredStringTrimmed(String text, int x, int y, int color, int width, boolean shadow) {
+    public void centeredStringTrimmed(String text, int x, int y, int width, int color, boolean shadow) {
         mc.font.drawShadow(pose, mc.font.plainSubstrByWidth(text, width), x - mc.font.width(mc.font.plainSubstrByWidth(text, width)) / 2f, y, color, shadow);
     }
 
     @Override
-    public void rightStringTrimmed(String text, int x, int y, int color, int width) {
-        rightStringTrimmed(text, x, y, color, width, false);
+    public void rightStringTrimmed(String text, int x, int y, int width, int color) {
+        rightStringTrimmed(text, x, y, width, color, false);
     }
 
     @Override
-    public void rightStringTrimmed(String text, int x, int y, int color, int width, boolean shadow) {
+    public void rightStringTrimmed(String text, int x, int y, int width, int color, boolean shadow) {
         mc.font.drawShadow(pose, mc.font.plainSubstrByWidth(text, width), x - mc.font.width(mc.font.plainSubstrByWidth(text, width)), y, color, shadow);
     }
 
@@ -194,44 +247,33 @@ public class MCRenderer extends GuiComponent implements Renderer<MCTexture<Abstr
         rightColoredString(trimToWidth(text, width), x, y, shadow);
     }
 
+    @Override
     public String trimToWidth(String text, int width) {
         return mc.font.plainSubstrByWidth(text, width);
     }
 
     @Override
-    public ColoredString trimToWidth(ColoredString text, int width) {
-        ColoredString trimmed = new ColoredString();
-        int[] curWidth = {0};
-        boolean[] done = {false};
-        text.visit((s, c) -> {
-            if (done[0]) return;
-            if (curWidth[0] + mc.font.width(s) <= width) {
-                trimmed.append(s, c);
-                curWidth[0] += mc.font.width(s);
-            } else {
-                String trim = mc.font.plainSubstrByWidth(s, width - curWidth[0]);
-                if (trim.length() > 0) {
-                    trimmed.append(trim, c);
-                    curWidth[0] += mc.font.width(trim);
-                    done[0] = true;
-                }
-            }
-        });
-        return trimmed;
+    public void line(int x1, int y1, int x2, int y2, int color) {
     }
 
     @Override
-    public void line(int x1, int y1, int x2, int y2, int color) {
+    public void line(int x1, int y1, int x2, int y2, int color, int thickness) {
         pose.pushPose();
         pose.translate(x1, y1, 0);
         // rotate so that the line is horizontal
         pose.mulPose(new Quaternionf().rotateLocalZ((float) Math.toDegrees(Math.atan2(y2 - y1, x2 - x1))));
         // calculate the length of the line
-        int length = (int) Math.sqrt(Math.pow(x2 - x1, 2) + Math.pow(y2 - y1, 2));
+        float length = (float) Math.sqrt(Math.pow(x2 - x1, 2) + Math.pow(y2 - y1, 2));
         // stretch pose to the length of the line
         pose.scale(length, 1, 1);
         // draw the line
-        fill(pose, 0, 0, 1, 1, color);
+        if (thickness < 2) {
+            // draw a single line
+            fill(pose, 0, 0, 1, 1, color);
+        } else {
+            // draw a rectangle
+            fill(pose, 0, -thickness / 2, 1, thickness / 2, color);
+        }
         pose.popPose();
     }
 
@@ -270,7 +312,7 @@ public class MCRenderer extends GuiComponent implements Renderer<MCTexture<Abstr
 
     @Override
     public void openScreen(Screen screen) {
-        mc.setScreen(new MCScreenWrapper(screen, mc.screen));
+        mc.setScreen(new MCScreenWrapper(screen));
     }
 
     @Override
@@ -281,10 +323,20 @@ public class MCRenderer extends GuiComponent implements Renderer<MCTexture<Abstr
     }
 
     @Override
-    public Screen getCurrentScreen() {
+    public Screen getCurrentGuestScreen() {
         if (mc.screen instanceof MCScreenWrapper) {
             return ((MCScreenWrapper) mc.screen).getScreen();
         }
         return null;
+    }
+
+    @Override
+    public Object getCurrentHostScreen() {
+        return mc.screen;
+    }
+
+    @Override
+    public boolean isGuestScreen() {
+        return mc.screen instanceof MCScreenWrapper;
     }
 }

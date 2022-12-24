@@ -6,113 +6,23 @@ import xyz.wagyourtail.wagyourgui.api.theme.Theme;
 import java.util.Arrays;
 import java.util.function.Consumer;
 
-public class Button implements Element, Interactable, Renderable {
-    private int x;
-    private int y;
-
-    private int width;
-    private int height;
-
-    private boolean visible;
-    private boolean enabled;
-
+public class Button extends AbstractElement implements Themeable<Theme.ButtonTheme> {
     private Consumer<Button> onClick;
 
-    private Theme.ButtonTheme theme;
+    private Theme.ButtonTheme theme = Theme.currentTheme.button[0];
 
     private Object text;
 
     public Button(int x, int y, int width, int height, ColoredString text, Consumer<Button> onClick) {
-        this.x = x;
-        this.y = y;
-        this.width = width;
-        this.height = height;
+        super(x, y, width, height);
         this.text = text;
         this.onClick = onClick;
-        this.visible = true;
-        this.enabled = true;
     }
 
     public Button(int x, int y, int width, int height, String text, Consumer<Button> onClick) {
-        this.x = x;
-        this.y = y;
-        this.width = width;
-        this.height = height;
+        super(x, y, width, height);
         this.text = text;
         this.onClick = onClick;
-        this.visible = true;
-        this.enabled = true;
-    }
-
-
-    @Override
-    public int getX() {
-        return x;
-    }
-
-    @Override
-    public int getY() {
-        return y;
-    }
-
-    @Override
-    public int getWidth() {
-        return width;
-    }
-
-    @Override
-    public int getHeight() {
-        return height;
-    }
-
-    @Override
-    public void setX(int x) {
-        this.x = x;
-    }
-
-    @Override
-    public void setY(int y) {
-        this.y = y;
-    }
-
-    @Override
-    public void setWidth(int width) {
-        this.width = width;
-    }
-
-    @Override
-    public void setHeight(int height) {
-        this.height = height;
-    }
-
-    @Override
-    public void setPos(int x, int y) {
-        this.x = x;
-        this.y = y;
-    }
-
-    @Override
-    public void setSize(int width, int height) {
-        this.width = width;
-        this.height = height;
-    }
-
-    @Override
-    public void setBounds(int x, int y, int width, int height) {
-        this.x = x;
-        this.y = y;
-        this.width = width;
-        this.height = height;
-    }
-
-    @Override
-    public boolean isWithinBounds(int x, int y) {
-        return x >= this.x && x <= this.x + this.width && y >= this.y && y <= this.y + this.height;
-    }
-
-    @Override
-    public boolean shouldFocus(int x, int y) {
-        return isWithinBounds(x, y) && enabled;
     }
 
     public void setOnClick(Consumer<Button> onClick) {
@@ -123,26 +33,12 @@ public class Button implements Element, Interactable, Renderable {
         return onClick;
     }
 
-    public void setVisible(boolean visible) {
-        this.visible = visible;
-    }
-
-    public boolean isVisible() {
-        return visible;
-    }
-
-    public void setEnabled(boolean enabled) {
-        this.enabled = enabled;
-    }
-
-    public boolean isEnabled() {
-        return enabled;
-    }
-
+    @Override
     public void setThemeIndex(int themeIndex) {
         this.theme = Theme.currentTheme.button[themeIndex % Theme.currentTheme.button.length];
     }
 
+    @Override
     public int getThemeIndex() {
         return Arrays.asList(Theme.currentTheme.button).indexOf(theme);
     }
@@ -156,45 +52,47 @@ public class Button implements Element, Interactable, Renderable {
         return new ColoredString().append((String) text, theme.textColor);
     }
 
-    private Theme.ButtonTheme getTheme() {
+    @Override
+    public Theme.ButtonTheme getTheme() {
         return theme;
     }
 
     @Override
+    public boolean onReleased(int mouseX, int mouseY, int button, int mods) {
+        onClick.accept(this);
+        return true;
+    }
+
+    @Override
     public void onRender(int mouseX, int mouseY) {
+        if (!visible) return;
         boolean hovered = mouseX >= x && mouseX <= x + width && mouseY >= y && mouseY <= y + height;
 
-        if (theme.texture != null) {
+        Theme.ButtonTheme theme = getTheme();
+
+        if (getTheme().bgTexture != null) {
             if (enabled) {
                 if (hovered) {
-                    RENDERER.drawTexturedRect(x, y, width, height, 40, 0, 256, 256, theme.texture);
+                    RENDERER.texturedRect(x, y, width, height, 40, 0, 256, 256, theme.bgTexture);
                 } else {
-                    RENDERER.drawTexturedRect(x, y, width, height, 20, 0, 256, 256, theme.texture);
+                    RENDERER.texturedRect(x, y, width, height, 20, 0, 256, 256, theme.bgTexture);
                 }
             } else {
-                RENDERER.drawTexturedRect(x, y, width, height, 0, 0, 256, 256, theme.texture);
+                RENDERER.texturedRect(x, y, width, height, 0, 0, 256, 256, theme.bgTexture);
             }
         } else {
-            RENDERER.drawLine(x, y, x + width, y, theme.borderColor);
-            RENDERER.drawLine(x, y + height, x + width, y + height, theme.borderColor);
-            RENDERER.drawLine(x, y, x, y + height, theme.borderColor);
-            RENDERER.drawLine(x + width, y, x + width, y + height, theme.borderColor);
+            RENDERER.rect(x, y, width, theme.borderWidth, theme.borderColor);
+            RENDERER.rect(x, y + height - theme.borderWidth, width, theme.borderWidth, theme.borderColor);
+            RENDERER.rect(x, y + theme.borderWidth, theme.borderWidth, height - theme.borderWidth * 2, theme.borderColor);
+            RENDERER.rect(x + width - theme.borderWidth, y + theme.borderWidth, theme.borderWidth, height - theme.borderWidth * 2, theme.borderColor);
 
-            if (enabled) {
-                if (hovered) {
-                    RENDERER.drawRect(x + 1, y + 1, width - 2, height - 2, theme.hoverBgColor);
-                } else {
-                    RENDERER.drawRect(x + 1, y + 1, width - 2, height - 2, theme.bgColor);
-                }
-            } else {
-                RENDERER.drawRect(x + 1, y + 1, width - 2, height - 2, theme.hoverBgColor);
-            }
+            RENDERER.rect(x + theme.borderWidth, y + theme.borderWidth, width - theme.borderWidth * 2, height - theme.borderWidth * 2, enabled ? hovered ? theme.hoverBgColor : theme.bgColor : theme.disabledBgColor);
         }
 
         if (text instanceof ColoredString) {
-            RENDERER.drawCenteredColoredStringTrimmed((ColoredString) text, x + width / 2, y + height / 2, width - 4, true);
+            RENDERER.centeredColoredStringTrimmed((ColoredString) text, x + width / 2, y + height / 2, width - 4, true);
         } else {
-            RENDERER.drawCenteredStringTrimmed(text.toString(), x + width / 2, y + height / 2, width - 4, theme.textColor, true);
+            RENDERER.centeredStringTrimmed(text.toString(), x + width / 2, y + height / 2, width - 4, theme.textColor, true);
         }
     }
 }

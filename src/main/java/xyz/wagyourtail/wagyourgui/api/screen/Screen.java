@@ -1,254 +1,141 @@
 package xyz.wagyourtail.wagyourgui.api.screen;
 
-import xyz.wagyourtail.wagyourgui.api.container.LayeredElementContainer;
-import xyz.wagyourtail.wagyourgui.api.element.Element;
-import xyz.wagyourtail.wagyourgui.api.element.Interactable;
-import xyz.wagyourtail.wagyourgui.api.element.Renderable;
-import xyz.wagyourtail.wagyourgui.api.element.Ticking;
+import org.jetbrains.annotations.ApiStatus;
+import xyz.wagyourtail.wagyourgui.api.container.AbstractLayeredElementContainer;
+import xyz.wagyourtail.wagyourgui.api.element.*;
+import xyz.wagyourtail.wagyourgui.api.keys.Keyboard;
+import xyz.wagyourtail.wagyourgui.api.theme.Theme;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.Arrays;
 
-public class Screen implements Interactable, Ticking, Renderable, LayeredElementContainer {
-    private final Map<Integer, ElementLayer> elements = new HashMap<>();
-    public final Screen parent;
-    private Element focusedElement = null;
-    private int currentLayer = 0;
+public class Screen extends AbstractLayeredElementContainer implements Interactable, Ticking, Renderable, Themeable<Theme.ScreenTheme> {
+    private Object parent;
+    private Runnable openParent;
+
+    protected int width;
+    protected int height;
+
+    private Theme.ScreenTheme theme = Theme.currentTheme.screen[0];
+    private boolean transparentBg;
 
     public Screen(Screen parent) {
+        setParent(parent);
+        setOpenParent(() -> RENDERER.openScreen((Screen) this.parent));
+    }
+
+    /**
+     * make sure to use a host parent screen here... ie. a minecraft screen.
+     * @param parent
+     */
+    public Screen(Object parent) {
+        setParent(parent);
+    }
+
+    @ApiStatus.Internal
+    public void setParent(Object parent) {
         this.parent = parent;
     }
 
-    public void onInit() {
-        elements.clear();
+    public Screen getParentAsGuest() {
+        if (parent instanceof Screen) {
+            return (Screen) parent;
+        } else {
+            return null;
+        }
+    }
+
+    @ApiStatus.Internal
+    public Object getParentHost() {
+        return parent;
+    }
+
+    public boolean isParentGuest() {
+        return parent instanceof Screen;
+    }
+
+    public void onInit(int width, int height, boolean transparentBg) {
+        this.width = width;
+        this.height = height;
+        this.transparentBg = transparentBg;
+        elements = new ElementLayer[1];
+        focusedElement = null;
         currentLayer = 0;
     }
 
     public void close() {
-        Element.RENDERER.openScreen(parent);
+        openParent.run();
     }
 
-    public void onFocusChanged(Element element) {
-        focusedElement = element;
+    @ApiStatus.Internal
+    public void setOpenParent(Runnable openParent) {
+        this.openParent = openParent;
     }
 
-    public Element getFocusedElement() {
+    public Interactable getFocusedElement() {
         return focusedElement;
     }
 
     @Override
     public void onRender(int mouseX, int mouseY) {
-        for (ElementLayer l : elements.values()) {
-            if (l.isVisible()) {
-                for (Element e : l.getElements()) {
-                    if (e instanceof Renderable) {
-                        ((Renderable) e).onRender(mouseX, mouseY);
-                    }
-                }
+        // draw background
+        if (getTheme().bgTexture == null) {
+            int bgColor = getTheme().bgColor;
+            if (!transparentBg) {
+                bgColor = bgColor | 0xFF000000;
             }
+            Renderable.RENDERER.rect(0, 0, width, height, bgColor);
+        } else {
+            Renderable.RENDERER.texturedRect(0, 0, width, height, 0, 0, 16, 16, theme.bgTexture);
         }
+        // draw elements
+        super.onRender(mouseX, mouseY);
     }
 
     @Override
-    public void addElement(Element element) {
-        addElement(currentLayer, element);
+    public void setVisible(boolean visible) {
+        // NO-OP
     }
 
     @Override
-    public void removeElement(Element element) {
-        removeElement(currentLayer, element);
+    public boolean isVisible() {
+        return true;
     }
 
     @Override
-    public void clearElements() {
-        clearElements(currentLayer);
+    public void setThemeIndex(int index) {
+        theme = Theme.currentTheme.screen[index];
     }
 
     @Override
-    public void addElement(int layer, Element element) {
-        if (!elements.containsKey(layer)) {
-            elements.put(layer, new ElementLayer());
-        }
+    public int getThemeIndex() {
+        return Arrays.asList(Theme.currentTheme.screen).indexOf(theme);
     }
 
     @Override
-    public void removeElement(int layer, Element element) {
-        if (elements.containsKey(layer)) {
-            elements.get(layer).elements.remove(element);
-        }
+    public Theme.ScreenTheme getTheme() {
+        return theme;
     }
 
     @Override
-    public void clearElements(int layer) {
-        if (elements.containsKey(layer)) {
-            elements.get(layer).elements.clear();
-        }
+    public void setEnabled(boolean enabled) {
+        //NO-OP
     }
 
     @Override
-    public void setCurrentLayer(int layer) {
-        currentLayer = layer;
+    public boolean isEnabled() {
+        return true;
     }
 
     @Override
-    public int getCurrentLayer() {
-        return currentLayer;
+    public boolean onKeyPressed(int keyCode, int scanCode, int modifiers) {
+        if (Keyboard.getKey(keyCode) == Keyboard.ESCAPE) {
+            close();
+            return true;
+        }
+        return super.onKeyPressed(keyCode, scanCode, modifiers);
     }
 
-    @Override
-    public void setLayerVisible(int layer, boolean visible) {
-        if (elements.containsKey(layer)) {
-            elements.get(layer).setVisible(visible);
-        }
-    }
-
-    @Override
-    public void setLayerInteractable(int layer, boolean interactable) {
-        if (elements.containsKey(layer)) {
-            elements.get(layer).setInteractable(interactable);
-        }
-    }
-
-    @Override
-    public boolean isLayerVisible(int layer) {
-        return elements.containsKey(layer) && elements.get(layer).isVisible();
-    }
-
-    @Override
-    public boolean isLayerInteractable(int layer) {
-        return elements.containsKey(layer) && elements.get(layer).isInteractable();
-    }
-
-    @Override
-    public void onClicked(int mouseX, int mouseY, int button) {
-        for (ElementLayer l : elements.values()) {
-            if (l.isVisible() && l.isInteractable()) {
-                for (Element e : l.getElements()) {
-                    if (e instanceof Interactable) {
-                        ((Interactable) e).onClicked(mouseX, mouseY, button);
-                    }
-                }
-            }
-        }
-    }
-
-    @Override
-    public void onReleased(int mouseX, int mouseY, int button) {
-        for (ElementLayer l : elements.values()) {
-            if (l.isVisible() && l.isInteractable()) {
-                for (Element e : l.getElements()) {
-                    if (e instanceof Interactable) {
-                        ((Interactable) e).onReleased(mouseX, mouseY, button);
-                    }
-                }
-            }
-        }
-    }
-
-    @Override
-    public void onDragged(int mouseX, int mouseY, int button, double deltaX, double deltaY) {
-        for (ElementLayer l : elements.values()) {
-            if (l.isVisible() && l.isInteractable()) {
-                for (Element e : l.getElements()) {
-                    if (e instanceof Interactable) {
-                        ((Interactable) e).onDragged(mouseX, mouseY, button, deltaX, deltaY);
-                    }
-                }
-            }
-        }
-    }
-
-    @Override
-    public void onScrolled(int mouseX, int mouseY, double scroll) {
-        for (ElementLayer l : elements.values()) {
-            if (l.isVisible() && l.isInteractable()) {
-                for (Element e : l.getElements()) {
-                    if (e instanceof Interactable) {
-                        ((Interactable) e).onScrolled(mouseX, mouseY, scroll);
-                    }
-                }
-            }
-        }
-    }
-
-    @Override
-    public void onCharTyped(char character, int keyCode) {
-        for (ElementLayer l : elements.values()) {
-            if (l.isVisible() && l.isInteractable()) {
-                for (Element e : l.getElements()) {
-                    if (e instanceof Interactable) {
-                        ((Interactable) e).onCharTyped(character, keyCode);
-                    }
-                }
-            }
-        }
-    }
-
-    @Override
-    public void onKeyPressed(int keyCode, int scanCode, int modifiers) {
-        for (ElementLayer l : elements.values()) {
-            if (l.isVisible() && l.isInteractable()) {
-                for (Element e : l.getElements()) {
-                    if (e instanceof Interactable) {
-                        ((Interactable) e).onKeyPressed(keyCode, scanCode, modifiers);
-                    }
-                }
-            }
-        }
-    }
-
-    @Override
-    public void onKeyReleased(int keyCode, int scanCode, int modifiers) {
-        for (ElementLayer l : elements.values()) {
-            if (l.isVisible() && l.isInteractable()) {
-                for (Element e : l.getElements()) {
-                    if (e instanceof Interactable) {
-                        ((Interactable) e).onKeyReleased(keyCode, scanCode, modifiers);
-                    }
-                }
-            }
-        }
-    }
-
-    private static class ElementLayer {
-        private List<Element> elements;
-        private boolean visible;
-        private boolean interactable;
-
-        public ElementLayer(List<Element> elements, boolean visible, boolean interactable) {
-            this.elements = elements;
-            this.visible = visible;
-            this.interactable = interactable;
-        }
-
-        public ElementLayer() {
-            this(new ArrayList<>(), true, true);
-        }
-
-        public List<Element> getElements() {
-            return elements;
-        }
-
-        public void setElements(List<Element> elements) {
-            this.elements = elements;
-        }
-
-        public boolean isVisible() {
-            return visible;
-        }
-
-        public void setVisible(boolean visible) {
-            this.visible = visible;
-        }
-
-        public boolean isInteractable() {
-            return interactable;
-        }
-
-        public void setInteractable(boolean interactable) {
-            this.interactable = interactable;
-        }
+    public boolean closeOnESC() {
+        return true;
     }
 }

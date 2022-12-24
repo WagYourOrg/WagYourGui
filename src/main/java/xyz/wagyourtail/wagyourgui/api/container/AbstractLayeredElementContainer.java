@@ -4,18 +4,15 @@ import xyz.wagyourtail.wagyourgui.api.element.Element;
 import xyz.wagyourtail.wagyourgui.api.element.Interactable;
 import xyz.wagyourtail.wagyourgui.api.element.Renderable;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
-public abstract class LayeredElementContainer implements ElementContainer, Interactable, Renderable {
-    protected final Map<Integer, ElementLayer> elements = new HashMap<>();
+public abstract class AbstractLayeredElementContainer implements ElementContainer, Interactable, Renderable {
+    protected ElementLayer[] elements = new ElementLayer[1];
     protected Interactable focusedElement = null;
     protected int currentLayer = 0;
     @Override
-    public void addElement(Element element) {
-        addElement(currentLayer, element);
+    public <T extends Element> T addElement(T element) {
+        return addElement(currentLayer, element);
     }
 
     @Override
@@ -28,21 +25,29 @@ public abstract class LayeredElementContainer implements ElementContainer, Inter
         clearElements(currentLayer);
     }
 
-    public void addElement(int layer, Element element) {
-        if (!elements.containsKey(layer)) {
-            elements.put(layer, new ElementLayer());
+    public <T extends Element> T addElement(int layer, T element) {
+        if (layer < elements.length && elements[layer] != null) {
+            elements[layer].elements.add(element);
+        } else if (layer < elements.length) {
+            elements[layer] = new ElementLayer(layer);
+            elements[layer].elements.add(element);
+        } else {
+            elements = Arrays.copyOf(elements, elements.length << 1);
+            elements[layer] = new ElementLayer(layer);
+            elements[layer].elements.add(element);
         }
+        return element;
     }
 
     public void removeElement(int layer, Element element) {
-        if (elements.containsKey(layer)) {
-            elements.get(layer).elements.remove(element);
+        if (layer < elements.length && elements[layer] != null) {
+            elements[layer].elements.remove(element);
         }
     }
 
     public void clearElements(int layer) {
-        if (elements.containsKey(layer)) {
-            elements.get(layer).elements.clear();
+        if (layer < elements.length && elements[layer] != null) {
+            elements[layer].elements.clear();
         }
     }
 
@@ -55,28 +60,30 @@ public abstract class LayeredElementContainer implements ElementContainer, Inter
     }
 
     public void setLayerVisible(int layer, boolean visible) {
-        if (elements.containsKey(layer)) {
-            elements.get(layer).setVisible(visible);
+        if (layer < elements.length && elements[layer] != null) {
+            elements[layer].visible = visible;
         }
     }
 
     public void setLayerInteractable(int layer, boolean interactable) {
-        if (elements.containsKey(layer)) {
-            elements.get(layer).setInteractable(interactable);
+        if (layer < elements.length && elements[layer] != null) {
+            elements[layer].interactable = interactable;
         }
     }
 
     public boolean isLayerVisible(int layer) {
-        return elements.containsKey(layer) && elements.get(layer).isVisible();
+        return layer < elements.length && elements[layer] != null && elements[layer].visible;
     }
 
     public boolean isLayerInteractable(int layer) {
-        return elements.containsKey(layer) && elements.get(layer).isInteractable();
+        return layer < elements.length && elements[layer] != null && elements[layer].interactable;
     }
 
     @Override
     public boolean onClicked(int mouseX, int mouseY, int button, int mods) {
-        outer: for (ElementLayer l : elements.values()) {
+        outer: for (int i = elements.length - 1; i >= 0; i--) {
+            ElementLayer l = elements[i];
+            if (l == null) continue;
             if (l.isVisible() && l.isInteractable()) {
                 for (Element e : l.getElements()) {
                     if (e instanceof Interactable && ((Interactable) e).shouldFocus(mouseX, mouseY)) {
@@ -84,12 +91,12 @@ public abstract class LayeredElementContainer implements ElementContainer, Inter
                             Interactable old = focusedElement;
                             focusedElement = (Interactable) e;
                             if (old != null) {
-                                ((Interactable) old).onFocused(false);
+                                old.onFocused(false);
                             }
                             focusedElement.onFocused(true);
                         }
+                        break outer;
                     }
-                    break outer;
                 }
             }
         }
@@ -154,7 +161,8 @@ public abstract class LayeredElementContainer implements ElementContainer, Inter
 
     @Override
     public void onRender(int mouseX, int mouseY) {
-        for (ElementLayer l : elements.values()) {
+        for (ElementLayer l : elements) {
+            if (l == null) continue;
             if (l.isVisible()) {
                 for (Element e : l.getElements()) {
                     if (e instanceof Renderable) {
@@ -165,19 +173,21 @@ public abstract class LayeredElementContainer implements ElementContainer, Inter
         }
     }
 
-    private static class ElementLayer {
+    protected static class ElementLayer {
+        private int layer;
         private List<Element> elements;
         private boolean visible;
         private boolean interactable;
 
-        public ElementLayer(List<Element> elements, boolean visible, boolean interactable) {
+        ElementLayer(List<Element> elements, int layer, boolean visible, boolean interactable) {
             this.elements = elements;
             this.visible = visible;
             this.interactable = interactable;
+            this.layer = layer;
         }
 
-        public ElementLayer() {
-            this(new ArrayList<>(), true, true);
+        public ElementLayer(int layer) {
+            this(new ArrayList<>(), layer, true, true);
         }
 
         public List<Element> getElements() {
@@ -202,6 +212,10 @@ public abstract class LayeredElementContainer implements ElementContainer, Inter
 
         public void setInteractable(boolean interactable) {
             this.interactable = interactable;
+        }
+
+        public int getLayer() {
+            return layer;
         }
     }
 }

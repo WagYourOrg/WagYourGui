@@ -1,0 +1,24 @@
+
+sourceCompatibility = JavaVersion.VERSION_17
+targetCompatibility = JavaVersion.VERSION_17
+
+compileJava {
+    options.release.set(17)
+}
+
+allprojects {
+
+    println path
+
+    repositories {
+        maven {
+            name "parchmentmc"
+            url = 'https://maven.parchmentmc.org'
+        }
+    }
+
+    dependencies {
+        mappings "org.parchmentmc.data:parchment-1.19.3:2022.12.18@zip"
+    }
+
+}

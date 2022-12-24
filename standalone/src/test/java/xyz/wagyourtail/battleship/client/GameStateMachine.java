@@ -1,2 +1,4 @@
-package xyz.wagyourtail.battleship.client;public class GameStateMachine {
+package xyz.wagyourtail.battleship.client;
+
+public class GameStateMachine {
 }

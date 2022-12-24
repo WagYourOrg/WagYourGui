@@ -16,6 +16,8 @@ public class Window {
     private int width;
     private int height;
 
+    private int mods = 0;
+
     private final Set<ResizeListener> resizeListeners = Collections.newSetFromMap(new WeakHashMap<>());
     private final Set<MouseListener> mouseListeners = Collections.newSetFromMap(new WeakHashMap<>());
     private final Set<KeyListener> keyListeners = Collections.newSetFromMap(new WeakHashMap<>());
@@ -25,6 +27,8 @@ public class Window {
         if (handle == MemoryUtil.NULL) {
             throw new RuntimeException("Failed to create the GLFW window");
         }
+
+        int[] mods = {0};
 
         glfwSetWindowSizeCallback(handle, (window, width1, height1) -> {
             this.width = width1;
@@ -36,9 +40,10 @@ public class Window {
             }
         });
 
-        glfwSetMouseButtonCallback(handle, (window, button, action, mods) -> {
+        glfwSetMouseButtonCallback(handle, (window, button, action, m) -> {
+            mods[0] = m;
             for (MouseListener listener : mouseListeners) {
-                listener.onMouseButton(button, action, mods);
+                listener.onMouseButton(button, action, m);
             }
         });
 
@@ -50,13 +55,14 @@ public class Window {
 
         glfwSetCharCallback(handle, (window, codepoint) -> {
             for (KeyListener listener : keyListeners) {
-                listener.onChar(codepoint);
+                listener.onChar(codepoint, mods[0]);
             }
         });
 
-        glfwSetKeyCallback(handle, (window, key, scancode, action, mods) -> {
+        glfwSetKeyCallback(handle, (window, key, scancode, action, m) -> {
+            mods[0] = m;
             for (KeyListener listener : keyListeners) {
-                listener.onKey(key, scancode, action, mods);
+                listener.onKey(key, scancode, action, m);
             }
         });
 
