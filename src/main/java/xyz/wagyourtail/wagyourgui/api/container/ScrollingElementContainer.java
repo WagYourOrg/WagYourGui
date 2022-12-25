@@ -144,7 +144,7 @@ public class ScrollingElementContainer extends AbstractElement implements Elemen
     @Override
     public void onRender(int mouseX, int mouseY) {
         for (Element e : elements) {
-            if (e instanceof Renderable) {
+            if (e instanceof Renderable && ((Renderable) e).isVisible()) {
                 ((Renderable) e).onRender(mouseX, mouseY);
             }
         }

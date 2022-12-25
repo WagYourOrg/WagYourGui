@@ -12,6 +12,8 @@ import xyz.wagyourtail.wagyourgui.standalone.glfw.image.DynamicTexture;
 import xyz.wagyourtail.wagyourgui.standalone.glfw.image.NativeImage;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 public class SRenderer implements Renderer<STexture<BaseTex>, SMutTexture> {
     public static SRenderer INSTANCE;
@@ -260,6 +262,24 @@ public class SRenderer implements Renderer<STexture<BaseTex>, SMutTexture> {
     @Override
     public String trimToWidth(String text, int width) {
         return session.font.trimToWidth(text, width);
+    }
+
+    @Override
+    public List<String> wrapString(String text, int width, boolean wordWrap) {
+        List<String> lines = new ArrayList<>();
+        int curWidth = 0;
+        String remaining = text;
+        while (!remaining.isEmpty()) {
+            String trim = trimToWidth(remaining, width);
+            if (wordWrap) {
+                int lastSpace = trim.lastIndexOf(' ');
+                if (lastSpace > 0)
+                    trim = trim.substring(0, lastSpace);
+            }
+            lines.add(trim);
+            remaining = remaining.substring(trim.length());
+        }
+        return lines;
     }
 
     @Override

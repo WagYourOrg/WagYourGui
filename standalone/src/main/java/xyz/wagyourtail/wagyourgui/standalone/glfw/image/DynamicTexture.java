@@ -4,7 +4,6 @@ import org.jetbrains.annotations.Nullable;
 import org.lwjgl.opengl.GL11;
 
 import java.nio.ByteBuffer;
-import java.util.concurrent.ThreadLocalRandom;
 
 public class DynamicTexture implements BaseTex {
     @Nullable

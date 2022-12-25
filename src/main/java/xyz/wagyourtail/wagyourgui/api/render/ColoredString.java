@@ -17,6 +17,10 @@ public class ColoredString {
         }
     }
 
+    public boolean isEmpty() {
+        return pairs.isEmpty();
+    }
+
     @FunctionalInterface
     public interface ColoredStringVisitor {
         void visit(String string, int color);

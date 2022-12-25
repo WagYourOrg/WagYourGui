@@ -9,10 +9,6 @@ public class Theme {
 
     public ButtonTheme[] button = { ButtonTheme.DEFAULT };
 
-    public ScrollbarTheme[] scrollbar = { ScrollbarTheme.DEFAULT };
-
-    public ScreenTheme[] screen = { ScreenTheme.DEFAULT };
-
     public static class ButtonTheme {
         public static final ButtonTheme DEFAULT = new ButtonTheme();
 
@@ -25,6 +21,8 @@ public class Theme {
 
         public Texture bgTexture = null;
     }
+
+    public ScrollbarTheme[] scrollbar = { ScrollbarTheme.DEFAULT };
 
     public static class ScrollbarTheme {
         public static final ScrollbarTheme DEFAULT = new ScrollbarTheme();
@@ -39,10 +37,26 @@ public class Theme {
         public Texture texture = null;
     }
 
+    public ScreenTheme[] screen = { ScreenTheme.DEFAULT };
+
     public static class ScreenTheme {
         public static final ScreenTheme DEFAULT = new ScreenTheme();
 
         public int bgColor = 0x4F2b2b2b;
+
+        public Texture bgTexture = null;
+    }
+
+    public OverlayTheme[] overlay = { OverlayTheme.DEFAULT };
+
+    public static class OverlayTheme {
+        public static final OverlayTheme DEFAULT = new OverlayTheme();
+
+        public int bgColor = 0xFF1b1b1b;
+        public int borderColor = 0xFFFFFFFF;
+        public int borderWidth = 1;
+
+        public int textColor = 0xFFFFFFFF;
 
         public Texture bgTexture = null;
     }

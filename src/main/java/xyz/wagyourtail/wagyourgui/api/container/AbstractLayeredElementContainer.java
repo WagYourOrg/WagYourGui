@@ -8,6 +8,7 @@ import java.util.*;
 
 public abstract class AbstractLayeredElementContainer implements ElementContainer, Interactable, Renderable {
     protected ElementLayer[] elements = new ElementLayer[1];
+    protected int topLayer = 0;
     protected Interactable focusedElement = null;
     protected int currentLayer = 0;
     @Override
@@ -47,7 +48,7 @@ public abstract class AbstractLayeredElementContainer implements ElementContaine
 
     public void clearElements(int layer) {
         if (layer < elements.length && elements[layer] != null) {
-            elements[layer].elements.clear();
+            elements[layer] = null;
         }
     }
 
@@ -84,7 +85,7 @@ public abstract class AbstractLayeredElementContainer implements ElementContaine
         outer: for (int i = elements.length - 1; i >= 0; i--) {
             ElementLayer l = elements[i];
             if (l == null) continue;
-            if (l.isVisible() && l.isInteractable()) {
+            if (l.isInteractable()) {
                 for (Element e : l.getElements()) {
                     if (e instanceof Interactable && ((Interactable) e).shouldFocus(mouseX, mouseY)) {
                         if (focusedElement != e) {
@@ -165,7 +166,7 @@ public abstract class AbstractLayeredElementContainer implements ElementContaine
             if (l == null) continue;
             if (l.isVisible()) {
                 for (Element e : l.getElements()) {
-                    if (e instanceof Renderable) {
+                    if (e instanceof Renderable && ((Renderable) e).isVisible()) {
                         ((Renderable) e).onRender(mouseX, mouseY);
                     }
                 }
@@ -173,7 +174,7 @@ public abstract class AbstractLayeredElementContainer implements ElementContaine
         }
     }
 
-    protected static class ElementLayer {
+    public static class ElementLayer implements ElementContainer {
         private int layer;
         private List<Element> elements;
         private boolean visible;
@@ -216,6 +217,22 @@ public abstract class AbstractLayeredElementContainer implements ElementContaine
 
         public int getLayer() {
             return layer;
+        }
+
+        @Override
+        public <T extends Element> T addElement(T element) {
+            elements.add(element);
+            return element;
+        }
+
+        @Override
+        public void removeElement(Element element) {
+            elements.remove(element);
+        }
+
+        @Override
+        public void clearElements() {
+            elements.clear();
         }
     }
 }

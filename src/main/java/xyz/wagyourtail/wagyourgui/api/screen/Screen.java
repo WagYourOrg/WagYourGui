@@ -85,7 +85,7 @@ public class Screen extends AbstractLayeredElementContainer implements Interacta
             }
             Renderable.RENDERER.rect(0, 0, width, height, bgColor);
         } else {
-            Renderable.RENDERER.texturedRect(0, 0, width, height, 0, 0, 16, 16, theme.bgTexture);
+            Renderable.RENDERER.texturedRect(0, 0, width, height, 0, 0, 16, 16, getTheme().bgTexture);
         }
         // draw elements
         super.onRender(mouseX, mouseY);
@@ -128,11 +128,12 @@ public class Screen extends AbstractLayeredElementContainer implements Interacta
 
     @Override
     public boolean onKeyPressed(int keyCode, int scanCode, int modifiers) {
+        if (super.onKeyPressed(keyCode, scanCode, modifiers)) return true;
         if (Keyboard.getKey(keyCode) == Keyboard.ESCAPE) {
             close();
             return true;
         }
-        return super.onKeyPressed(keyCode, scanCode, modifiers);
+        return false;
     }
 
     public boolean closeOnESC() {

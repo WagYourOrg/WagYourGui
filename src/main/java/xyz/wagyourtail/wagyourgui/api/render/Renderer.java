@@ -2,6 +2,9 @@ package xyz.wagyourtail.wagyourgui.api.render;
 
 import xyz.wagyourtail.wagyourgui.api.screen.Screen;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public interface Renderer<T extends Texture, M extends MutableTexture> {
     void rect(int x, int y, int width, int height, int color);
 
@@ -86,6 +89,41 @@ public interface Renderer<T extends Texture, M extends MutableTexture> {
             }
         });
         return trimmed;
+    }
+
+    List<String> wrapString(String text, int width, boolean wordWrap);
+
+    default List<ColoredString> wrapString(ColoredString text, int width, boolean wordWrap) {
+        List<ColoredString> wrapped = new ArrayList<>();
+        ColoredString[] cur = {new ColoredString()};
+        int[] curWidth = {0};
+        text.visit((s, c) -> {
+            String remaining = s;
+            while (!remaining.isEmpty()) {
+                if (curWidth[0] + getStringWidth(remaining) <= width) {
+                    cur[0].append(remaining, c);
+                    curWidth[0] += getStringWidth(remaining);
+                    remaining = "";
+                } else {
+                    String trim = trimToWidth(remaining, width - curWidth[0]);
+                    if (wordWrap) {
+                        int lastSpace = trim.lastIndexOf(' ');
+                        if (lastSpace > 0)
+                            trim = trim.substring(0, lastSpace);
+                    }
+                    if (trim.length() > 0) {
+                        cur[0].append(trim, c);
+                        curWidth[0] += getStringWidth(trim);
+                        remaining = remaining.substring(trim.length());
+                    } else {
+                        wrapped.add(cur[0]);
+                        cur[0] = new ColoredString();
+                        curWidth[0] = 0;
+                    }
+                }
+            }
+        });
+        return wrapped;
     }
 
     void line(int x1, int y1, int x2, int y2, int color);

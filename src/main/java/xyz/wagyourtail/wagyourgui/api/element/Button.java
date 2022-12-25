@@ -49,7 +49,7 @@ public class Button extends AbstractElement implements Themeable<Theme.ButtonThe
 
     public ColoredString getText() {
         if (text instanceof ColoredString) return (ColoredString) text;
-        return new ColoredString().append((String) text, theme.textColor);
+        return new ColoredString().append((String) text, getTheme().textColor);
     }
 
     @Override
@@ -73,9 +73,9 @@ public class Button extends AbstractElement implements Themeable<Theme.ButtonThe
         if (getTheme().bgTexture != null) {
             if (enabled) {
                 if (hovered) {
-                    RENDERER.texturedRect(x, y, width, height, 40, 0, 256, 256, theme.bgTexture);
+                    RENDERER.texturedRect(x, y, width, height, 40, 0, 200, 20, 256, 256, theme.bgTexture);
                 } else {
-                    RENDERER.texturedRect(x, y, width, height, 20, 0, 256, 256, theme.bgTexture);
+                    RENDERER.texturedRect(x, y, width, height, 20, 0, 200, 20, 256, 256, theme.bgTexture);
                 }
             } else {
                 RENDERER.texturedRect(x, y, width, height, 0, 0, 256, 256, theme.bgTexture);
