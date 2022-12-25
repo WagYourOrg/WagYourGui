@@ -23,7 +23,7 @@ public class Window {
     private final Set<KeyListener> keyListeners = Collections.newSetFromMap(new WeakHashMap<>());
 
     public Window(String title, int width, int height) {
-        this.handle = glfwCreateWindow(800, 600, "Konig Editor", MemoryUtil.NULL, MemoryUtil.NULL);
+        this.handle = glfwCreateWindow(800, 600, title, MemoryUtil.NULL, MemoryUtil.NULL);
         if (handle == MemoryUtil.NULL) {
             throw new RuntimeException("Failed to create the GLFW window");
         }

@@ -41,6 +41,7 @@ public abstract class AbstractOverlayElementContainer extends AbstractOverlay im
 
     @Override
     public boolean onClicked(int mouseX, int mouseY, int button, int mods) {
+        if (super.onClicked(mouseX, mouseY, button, mods)) return true;
         for (Element e : elements) {
             if (e instanceof Interactable && ((Interactable) e).shouldFocus(mouseX, mouseY)) {
                 if (focusedElement != e) {
@@ -67,6 +68,7 @@ public abstract class AbstractOverlayElementContainer extends AbstractOverlay im
 
     @Override
     public boolean onReleased(int mouseX, int mouseY, int button, int mods) {
+        if (super.onReleased(mouseX, mouseY, button, mods)) return true;
         if (focusedElement != null) {
             return focusedElement.onReleased(mouseX, mouseY, button, mods);
         }
@@ -75,6 +77,7 @@ public abstract class AbstractOverlayElementContainer extends AbstractOverlay im
 
     @Override
     public boolean onDragged(int mouseX, int mouseY, int button, double deltaX, double deltaY) {
+        if (super.onDragged(mouseX, mouseY, button, deltaX, deltaY)) return true;
         if (focusedElement != null) {
             return focusedElement.onDragged(mouseX, mouseY, button, deltaX, deltaY);
         }
@@ -83,6 +86,7 @@ public abstract class AbstractOverlayElementContainer extends AbstractOverlay im
 
     @Override
     public boolean onScrolled(int mouseX, int mouseY, double scroll) {
+        if (super.onScrolled(mouseX, mouseY, scroll)) return true;
         if (focusedElement != null) {
             return focusedElement.onScrolled(mouseX, mouseY, scroll);
         }
@@ -91,6 +95,7 @@ public abstract class AbstractOverlayElementContainer extends AbstractOverlay im
 
     @Override
     public boolean onCharTyped(char character, int mods) {
+        if (super.onCharTyped(character, mods)) return true;
         if (focusedElement != null) {
             return focusedElement.onCharTyped(character, mods);
         }
@@ -99,6 +104,7 @@ public abstract class AbstractOverlayElementContainer extends AbstractOverlay im
 
     @Override
     public boolean onKeyPressed(int keyCode, int scanCode, int modifiers) {
+        if (super.onKeyPressed(keyCode, scanCode, modifiers)) return true;
         if (focusedElement != null) {
             return focusedElement.onKeyPressed(keyCode, scanCode, modifiers);
         }
@@ -107,6 +113,7 @@ public abstract class AbstractOverlayElementContainer extends AbstractOverlay im
 
     @Override
     public boolean onKeyReleased(int keyCode, int scanCode, int modifiers) {
+        if (super.onKeyReleased(keyCode, scanCode, modifiers)) return true;
         if (focusedElement != null) {
             return focusedElement.onKeyReleased(keyCode, scanCode, modifiers);
         }

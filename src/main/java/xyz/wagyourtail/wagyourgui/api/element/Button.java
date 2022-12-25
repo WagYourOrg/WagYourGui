@@ -90,9 +90,9 @@ public class Button extends AbstractElement implements Themeable<Theme.ButtonThe
         }
 
         if (text instanceof ColoredString) {
-            RENDERER.centeredColoredStringTrimmed((ColoredString) text, x + width / 2, y + height / 2, width - 4, true);
+            RENDERER.centeredColoredStringTrimmed((ColoredString) text, x + width / 2, y + height / 2 - RENDERER.getStringHeight() / 2, width - 4, true);
         } else {
-            RENDERER.centeredStringTrimmed(text.toString(), x + width / 2, y + height / 2, width - 4, theme.textColor, true);
+            RENDERER.centeredStringTrimmed(text.toString(), x + width / 2, y + height / 2 - RENDERER.getStringHeight() / 2, width - 4, theme.textColor, true);
         }
     }
 }

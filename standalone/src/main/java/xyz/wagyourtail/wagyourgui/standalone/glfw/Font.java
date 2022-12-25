@@ -110,16 +110,16 @@ public class Font {
                 float cpX = xP.get(0);
                 float cpY = yP.get(0);
                 stbtt_GetBakedQuad(cdata, 1024, 1024, cp - 32, xP, yP, q, true);
-                xP.put(0, scale(cpX, xP.get(0), 1));
+                xP.put(0, scale(cpX, xP.get(0), FONT_HEIGHT / 24f));
                 // kerning
                 if (i < to) {
                     getCP(text, to, i, pCodePoint);
-                    xP.put(0, xP.get(0) + stbtt_GetCodepointKernAdvance(fontInfo, cp, pCodePoint.get(0)) * 1f);
+                    xP.put(0, xP.get(0) + stbtt_GetCodepointKernAdvance(fontInfo, cp, pCodePoint.get(0)) * FONT_HEIGHT / 24f);
                 }
-                float x0 = scale(cpX, q.x0(), 1f);
-                float x1 = scale(cpX, q.x1(), 1f);
-                float y0 = scale(cpY, q.y0(), 1f);
-                float y1 = scale(cpY, q.y1(), 1f);
+                float x0 = scale(cpX, q.x0(), FONT_HEIGHT / 24f);
+                float x1 = scale(cpX, q.x1(), FONT_HEIGHT / 24f);
+                float y0 = scale(cpY, q.y0(), FONT_HEIGHT / 24f);
+                float y1 = scale(cpY, q.y1(), FONT_HEIGHT / 24f);
 
                 glTexCoord2f(q.s0(), q.t0());
                 glVertex2f(x0 + x, y0 + y);
@@ -152,16 +152,16 @@ public class Font {
                 int cp = pCodePoint.get(0);
 
                 stbtt_GetCodepointHMetrics(fontInfo, cp, pAdvancedWidth, pLeftSideBearing);
-                width += pAdvancedWidth.get(0);
+                width += pAdvancedWidth.get(0) * scale;
 
                 if (i < text.length()) {
                     getCP(text, text.length(), i, pCodePoint);
-                    width += stbtt_GetCodepointKernAdvance(fontInfo, cp, pCodePoint.get(0));
+                    width += stbtt_GetCodepointKernAdvance(fontInfo, cp, pCodePoint.get(0)) * scale;
                 }
             }
         }
 
-        return width * scale * 3.5f;
+        return width * 1.5f;
     }
 
     public float drawTrimmed(String text, float x, float y, float width) {
@@ -193,16 +193,16 @@ public class Font {
                 float cpX = xP.get(0);
                 float cpY = yP.get(0);
                 stbtt_GetBakedQuad(cdata, 1024, 1024, cp - 32, xP, yP, q, true);
-                xP.put(0, scale(cpX, xP.get(0), 1));
+                xP.put(0, scale(cpX, xP.get(0), FONT_HEIGHT / 24f));
                 // kerning
                 if (i < to) {
                     getCP(text, to, i, pCodePoint);
-                    xP.put(0, xP.get(0) + stbtt_GetCodepointKernAdvance(fontInfo, cp, pCodePoint.get(0)) * 1f);
+                    xP.put(0, xP.get(0) + stbtt_GetCodepointKernAdvance(fontInfo, cp, pCodePoint.get(0)) * FONT_HEIGHT / 24f);
                 }
-                float x0 = scale(cpX, q.x0(), 1f);
-                float x1 = scale(cpX, q.x1(), 1f);
-                float y0 = scale(cpY, q.y0(), 1f);
-                float y1 = scale(cpY, q.y1(), 1f);
+                float x0 = scale(cpX, q.x0(), FONT_HEIGHT / 24f);
+                float x1 = scale(cpX, q.x1(), FONT_HEIGHT / 24f);
+                float y0 = scale(cpY, q.y0(), FONT_HEIGHT / 24f);
+                float y1 = scale(cpY, q.y1(), FONT_HEIGHT / 24f);
 
                 if (q.x1() - x > width) {
                     glEnd();

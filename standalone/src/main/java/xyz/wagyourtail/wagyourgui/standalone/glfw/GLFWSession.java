@@ -23,6 +23,7 @@ public class GLFWSession implements ResizeListener, MouseListener, KeyListener {
     public Window window;
     public Font font;
     public long fps;
+    public int GUI_SCALE = 2;
     public final Map<String, BaseTex> textures = new HashMap<>();
 
     private boolean running = false;
@@ -61,7 +62,7 @@ public class GLFWSession implements ResizeListener, MouseListener, KeyListener {
         glfwWindowHint(GLFW_RESIZABLE, GLFW_TRUE);
         glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, GLFW_TRUE);
 
-        window = new Window("Konig Editor", 800, 600);
+        window = new Window("Standalone Renderer", 800, 600);
         window.addResizeListener(this);
         window.addKeyListener(this);
         window.addMouseListener(this);
@@ -96,8 +97,14 @@ public class GLFWSession implements ResizeListener, MouseListener, KeyListener {
     }
 
     public void setScreen(Screen screen) {
-        this.screen = screen;
-        screen.onInit(window.getWidth(), window.getHeight(), false);
+        if (screen == null) this.screen = new Screen(null) {
+            @Override
+            public void onRender(int mouseX, int mouseY) {
+                RENDERER.centeredString("No Screen", width / 2, height / 2 - RENDERER.getStringHeight() / 2, 0xFFFFFFFF);
+            }
+        };
+        else this.screen = screen;
+        this.screen.onInit(window.getWidth() / GUI_SCALE, window.getHeight() / GUI_SCALE, false);
     }
 
     public void loop() {
@@ -125,7 +132,7 @@ public class GLFWSession implements ResizeListener, MouseListener, KeyListener {
             GL11.glDisable(GL_TEXTURE_2D);
 
             glTranslatef(-1, 1, 0f);
-            glScalef(2f / window.getWidth(), -2f / window.getHeight(), 1f);
+            glScalef(2f / window.getWidth() * GUI_SCALE, -2f / window.getHeight() * GUI_SCALE, 1f);
 
 //            glEnable(GL_BLEND);
 //            glEnable(GL_POLYGON_SMOOTH);
@@ -147,6 +154,8 @@ public class GLFWSession implements ResizeListener, MouseListener, KeyListener {
             double[] cursorX = new double[1];
             double[] cursorY = new double[1];
             glfwGetCursorPos(window.handle, cursorX, cursorY);
+            cursorX[0] /= GUI_SCALE;
+            cursorY[0] /= GUI_SCALE;
 
             screen.onRender((int) cursorX[0], (int) cursorY[0]);
 
@@ -159,7 +168,7 @@ public class GLFWSession implements ResizeListener, MouseListener, KeyListener {
 
     @Override
     public void onWindowResize(Window window) {
-        screen.onInit(window.getWidth(), window.getHeight(), false);
+        screen.onInit(window.getWidth() / GUI_SCALE, window.getHeight() / GUI_SCALE, false);
     }
 
     @Override
@@ -186,6 +195,8 @@ public class GLFWSession implements ResizeListener, MouseListener, KeyListener {
         double[] cursorX = new double[1];
         double[] cursorY = new double[1];
         glfwGetCursorPos(window.handle, cursorX, cursorY);
+        cursorX[0] /= GUI_SCALE;
+        cursorY[0] /= GUI_SCALE;
         switch (action) {
             case 1:
                 screen.onClicked((int) cursorX[0], (int) cursorY[0], button, mods);
@@ -203,10 +214,12 @@ public class GLFWSession implements ResizeListener, MouseListener, KeyListener {
 
     @Override
     public void onMousePos(double x, double y) {
+        x /= GUI_SCALE;
+        y /= GUI_SCALE;
         for (int i = 0; i < 6; ++i) {
             if (glfwGetMouseButton(window.handle, i) == GLFW_PRESS) {
-                sX[i] = x;
-                sY[i] = y;
+                sX[i] = x * GUI_SCALE;
+                sY[i] = y * GUI_SCALE;
                 screen.onDragged((int) x, (int) y, i, x - sX[i], y - sY[i]);
             }
         }
@@ -217,6 +230,8 @@ public class GLFWSession implements ResizeListener, MouseListener, KeyListener {
         double[] cursorX = new double[1];
         double[] cursorY = new double[1];
         glfwGetCursorPos(window.handle, cursorX, cursorY);
+        cursorX[0] /= GUI_SCALE;
+        cursorY[0] /= GUI_SCALE;
         screen.onScrolled((int) cursorX[0], (int) cursorY[0], dy);
     }
 }

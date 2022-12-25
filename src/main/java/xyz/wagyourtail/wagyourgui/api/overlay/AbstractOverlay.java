@@ -2,6 +2,7 @@ package xyz.wagyourtail.wagyourgui.api.overlay;
 
 import xyz.wagyourtail.wagyourgui.api.element.Renderable;
 import xyz.wagyourtail.wagyourgui.api.element.Themeable;
+import xyz.wagyourtail.wagyourgui.api.keys.Keyboard;
 import xyz.wagyourtail.wagyourgui.api.theme.Theme;
 
 import java.util.Arrays;
@@ -153,5 +154,51 @@ public abstract class AbstractOverlay implements OverlayElement, Renderable, The
     @Override
     public boolean shouldClose() {
         return shouldClose;
+    }
+
+    @Override
+    public boolean onKeyPressed(int keyCode, int scanCode, int modifiers) {
+        if (overlay != null) return overlay.onKeyPressed(keyCode, scanCode, modifiers);
+        if (Keyboard.getKey(keyCode).equals(Keyboard.ESCAPE)) {
+            onClose();
+            return true;
+        }
+        return false;
+    }
+
+    @Override
+    public boolean onKeyReleased(int keyCode, int scanCode, int modifiers) {
+        if (overlay != null) return overlay.onKeyReleased(keyCode, scanCode, modifiers);
+        return false;
+    }
+
+    @Override
+    public boolean onCharTyped(char character, int mods) {
+        if (overlay != null) return overlay.onCharTyped(character, mods);
+        return false;
+    }
+
+    @Override
+    public boolean onClicked(int mouseX, int mouseY, int button, int mods) {
+        if (overlay != null) return overlay.onClicked(mouseX, mouseY, button, mods);
+        return false;
+    }
+
+    @Override
+    public boolean onReleased(int mouseX, int mouseY, int button, int mods) {
+        if (overlay != null) return overlay.onReleased(mouseX, mouseY, button, mods);
+        return false;
+    }
+
+    @Override
+    public boolean onDragged(int mouseX, int mouseY, int button, double deltaX, double deltaY) {
+        if (overlay != null) return overlay.onDragged(mouseX, mouseY, button, deltaX, deltaY);
+        return false;
+    }
+
+    @Override
+    public boolean onScrolled(int mouseX, int mouseY, double scroll) {
+        if (overlay != null) return overlay.onScrolled(mouseX, mouseY, scroll);
+        return false;
     }
 }

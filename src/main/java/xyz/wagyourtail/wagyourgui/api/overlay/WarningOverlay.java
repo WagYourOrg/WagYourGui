@@ -3,7 +3,6 @@ package xyz.wagyourtail.wagyourgui.api.overlay;
 import xyz.wagyourtail.wagyourgui.api.element.Button;
 import xyz.wagyourtail.wagyourgui.api.render.ColoredString;
 
-import java.util.ArrayList;
 import java.util.List;
 
 public class WarningOverlay extends AbstractOverlayElementContainer {
