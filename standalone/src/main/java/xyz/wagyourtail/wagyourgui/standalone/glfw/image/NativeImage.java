@@ -24,10 +24,10 @@ public final class NativeImage implements AutoCloseable {
     private final int width;
     private final int height;
     private final boolean useStbFree;
-    private long pixels;
     private final long size;
-
+    private long pixels;
     private int id = -1;
+
     public NativeImage(int width, int height, boolean useCalloc) {
         this(NativeImage.Format.RGBA, width, height, useCalloc);
     }
@@ -60,14 +60,6 @@ public final class NativeImage implements AutoCloseable {
         } else {
             throw new IllegalArgumentException("Invalid texture size: " + width + "x" + height);
         }
-    }
-
-    public String toString() {
-        return "NativeImage[" + this.format + " " + this.width + "x" + this.height + "@" + this.pixels + (this.useStbFree ? "S" : "N") + "]";
-    }
-
-    private boolean isOutsideBounds(int x, int y) {
-        return x < 0 || x >= this.width || y < 0 || y >= this.height;
     }
 
     public static NativeImage read(ByteBuffer textureData) throws IOException {
@@ -113,6 +105,63 @@ public final class NativeImage implements AutoCloseable {
 
             return var7;
         }
+    }
+
+    public static NativeImage fromBase64(String string) throws IOException {
+        byte[] $$1 = Base64.getDecoder().decode(string.replaceAll("\n", "").getBytes(StandardCharsets.UTF_8));
+        MemoryStack $$2 = MemoryStack.stackPush();
+
+        NativeImage var4;
+        try {
+            ByteBuffer $$3 = $$2.malloc($$1.length);
+            $$3.put($$1);
+            $$3.rewind();
+            var4 = read($$3);
+        } catch (Throwable var6) {
+            if ($$2 != null) {
+                try {
+                    $$2.close();
+                } catch (Throwable var5) {
+                    var6.addSuppressed(var5);
+                }
+            }
+
+            throw var6;
+        }
+
+        if ($$2 != null) {
+            $$2.close();
+        }
+
+        return var4;
+    }
+
+    public static int getA(int abgrColor) {
+        return abgrColor >> 24 & 0xFF;
+    }
+
+    public static int getR(int abgrColor) {
+        return abgrColor >> 0 & 0xFF;
+    }
+
+    public static int getG(int abgrColor) {
+        return abgrColor >> 8 & 0xFF;
+    }
+
+    public static int getB(int abgrColor) {
+        return abgrColor >> 16 & 0xFF;
+    }
+
+    public static int combine(int alpha, int blue, int green, int red) {
+        return (alpha & 0xFF) << 24 | (blue & 0xFF) << 16 | (green & 0xFF) << 8 | (red & 0xFF) << 0;
+    }
+
+    public String toString() {
+        return "NativeImage[" + this.format + " " + this.width + "x" + this.height + "@" + this.pixels + (this.useStbFree ? "S" : "N") + "]";
+    }
+
+    private boolean isOutsideBounds(int x, int y) {
+        return x < 0 || x >= this.width || y < 0 || y >= this.height;
     }
 
     private void checkAllocated() {
@@ -390,10 +439,10 @@ public final class NativeImage implements AutoCloseable {
                 int $$2 = Math.min(this.getWidth(), other.getWidth());
                 int $$3 = Math.min(this.getHeight(), other.getHeight());
 
-                for(int $$4 = 0; $$4 < $$3; ++$$4) {
+                for (int $$4 = 0; $$4 < $$3; ++$$4) {
                     int $$5 = $$4 * other.getWidth() * $$1;
                     int $$6 = $$4 * this.getWidth() * $$1;
-                    MemoryUtil.memCopy(other.pixels + (long)$$5, this.pixels + (long)$$6, (long)$$2);
+                    MemoryUtil.memCopy(other.pixels + (long) $$5, this.pixels + (long) $$6, (long) $$2);
                 }
             }
         }
@@ -469,56 +518,6 @@ public final class NativeImage implements AutoCloseable {
         }
     }
 
-
-    public static NativeImage fromBase64(String string) throws IOException {
-        byte[] $$1 = Base64.getDecoder().decode(string.replaceAll("\n", "").getBytes(StandardCharsets.UTF_8));
-        MemoryStack $$2 = MemoryStack.stackPush();
-
-        NativeImage var4;
-        try {
-            ByteBuffer $$3 = $$2.malloc($$1.length);
-            $$3.put($$1);
-            $$3.rewind();
-            var4 = read($$3);
-        } catch (Throwable var6) {
-            if ($$2 != null) {
-                try {
-                    $$2.close();
-                } catch (Throwable var5) {
-                    var6.addSuppressed(var5);
-                }
-            }
-
-            throw var6;
-        }
-
-        if ($$2 != null) {
-            $$2.close();
-        }
-
-        return var4;
-    }
-
-    public static int getA(int abgrColor) {
-        return abgrColor >> 24 & 0xFF;
-    }
-
-    public static int getR(int abgrColor) {
-        return abgrColor >> 0 & 0xFF;
-    }
-
-    public static int getG(int abgrColor) {
-        return abgrColor >> 8 & 0xFF;
-    }
-
-    public static int getB(int abgrColor) {
-        return abgrColor >> 16 & 0xFF;
-    }
-
-    public static int combine(int alpha, int blue, int green, int red) {
-        return (alpha & 0xFF) << 24 | (blue & 0xFF) << 16 | (green & 0xFF) << 8 | (red & 0xFF) << 0;
-    }
-
     public static enum Format {
         RGBA(4, 6408, true, true, true, false, true, 0, 8, 16, 255, 24, true),
         RGB(3, 6407, true, true, true, false, false, 0, 8, 16, 255, 255, true),
@@ -567,6 +566,20 @@ public final class NativeImage implements AutoCloseable {
             this.luminanceOffset = luminanceOffset;
             this.alphaOffset = alphaOffset;
             this.supportedByStb = supportedByStb;
+        }
+
+        static NativeImage.Format getStbFormat(int channels) {
+            switch (channels) {
+                case 1:
+                    return LUMINANCE;
+                case 2:
+                    return LUMINANCE_ALPHA;
+                case 3:
+                    return RGB;
+                case 4:
+                default:
+                    return RGBA;
+            }
         }
 
         public int components() {
@@ -659,20 +672,6 @@ public final class NativeImage implements AutoCloseable {
 
         public boolean supportedByStb() {
             return this.supportedByStb;
-        }
-
-        static NativeImage.Format getStbFormat(int channels) {
-            switch (channels) {
-                case 1:
-                    return LUMINANCE;
-                case 2:
-                    return LUMINANCE_ALPHA;
-                case 3:
-                    return RGB;
-                case 4:
-                default:
-                    return RGBA;
-            }
         }
     }
 

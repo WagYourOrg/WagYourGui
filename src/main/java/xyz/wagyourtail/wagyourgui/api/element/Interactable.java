@@ -2,8 +2,9 @@ package xyz.wagyourtail.wagyourgui.api.element;
 
 public interface Interactable {
     default boolean shouldFocus(int x, int y) {
-        return ((Element) this).isWithinBounds(x, y) && isEnabled();
+        return ((Element) this).isWithinBounds(x, y);
     }
+
     default boolean onClicked(int mouseX, int mouseY, int button, int mods) {
         return false;
     }
@@ -32,9 +33,6 @@ public interface Interactable {
         return false;
     }
 
-    default void onFocused(boolean focused) {}
-
-    void setEnabled(boolean enabled);
-
-    boolean isEnabled();
+    default void onFocused(boolean focused) {
+    }
 }

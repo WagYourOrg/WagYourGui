@@ -10,8 +10,4 @@ public interface Renderable {
     Renderer<?, ?> RENDERER = ServiceLoader.load(Renderer.class).iterator().next();
 
     void onRender(int mouseX, int mouseY);
-
-    void setVisible(boolean visible);
-
-    boolean isVisible();
 }

@@ -1,20 +1,21 @@
 package xyz.wagyourtail.wagyourgui.api.screen;
 
 import org.jetbrains.annotations.ApiStatus;
-import xyz.wagyourtail.wagyourgui.api.container.AbstractLayeredElementContainer;
-import xyz.wagyourtail.wagyourgui.api.element.*;
-import xyz.wagyourtail.wagyourgui.api.keys.Keyboard;
+import xyz.wagyourtail.wagyourgui.api.container.LayeredElementContainer;
+import xyz.wagyourtail.wagyourgui.api.element.Interactable;
+import xyz.wagyourtail.wagyourgui.api.element.Renderable;
+import xyz.wagyourtail.wagyourgui.api.element.Themeable;
+import xyz.wagyourtail.wagyourgui.api.element.Ticking;
+import xyz.wagyourtail.wagyourgui.api.keys.Key;
 import xyz.wagyourtail.wagyourgui.api.theme.Theme;
 
 import java.util.Arrays;
 
-public class Screen extends AbstractLayeredElementContainer implements Interactable, Ticking, Renderable, Themeable<Theme.ScreenTheme> {
-    private Object parent;
-    private Runnable openParent;
-
+public abstract class Screen extends LayeredElementContainer implements Interactable, Ticking, Renderable, Themeable<Theme.ScreenTheme> {
     protected int width;
     protected int height;
-
+    private Object parent;
+    private Runnable openParent;
     private Theme.ScreenTheme theme = Theme.currentTheme.screen[0];
     private boolean transparentBg;
 
@@ -25,6 +26,7 @@ public class Screen extends AbstractLayeredElementContainer implements Interacta
 
     /**
      * make sure to use a host parent screen here... ie. a minecraft screen.
+     *
      * @param parent
      */
     public Screen(Object parent) {
@@ -92,13 +94,8 @@ public class Screen extends AbstractLayeredElementContainer implements Interacta
     }
 
     @Override
-    public void setVisible(boolean visible) {
-        // NO-OP
-    }
-
-    @Override
-    public boolean isVisible() {
-        return true;
+    public int getThemeIndex() {
+        return Arrays.asList(Theme.currentTheme.screen).indexOf(theme);
     }
 
     @Override
@@ -107,29 +104,14 @@ public class Screen extends AbstractLayeredElementContainer implements Interacta
     }
 
     @Override
-    public int getThemeIndex() {
-        return Arrays.asList(Theme.currentTheme.screen).indexOf(theme);
-    }
-
-    @Override
     public Theme.ScreenTheme getTheme() {
         return theme;
     }
 
     @Override
-    public void setEnabled(boolean enabled) {
-        //NO-OP
-    }
-
-    @Override
-    public boolean isEnabled() {
-        return true;
-    }
-
-    @Override
     public boolean onKeyPressed(int keyCode, int scanCode, int modifiers) {
         if (super.onKeyPressed(keyCode, scanCode, modifiers)) return true;
-        if (Keyboard.getKey(keyCode) == Keyboard.ESCAPE) {
+        if (Key.getKey(keyCode) == Key.ESCAPE) {
             close();
             return true;
         }

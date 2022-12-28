@@ -12,15 +12,13 @@ import static org.lwjgl.opengl.GL11.glViewport;
 
 public class Window {
     public final long handle;
-    private boolean visible = false;
-    private int width;
-    private int height;
-
-    private int mods = 0;
-
     private final Set<ResizeListener> resizeListeners = Collections.newSetFromMap(new WeakHashMap<>());
     private final Set<MouseListener> mouseListeners = Collections.newSetFromMap(new WeakHashMap<>());
     private final Set<KeyListener> keyListeners = Collections.newSetFromMap(new WeakHashMap<>());
+    private boolean visible = false;
+    private int width;
+    private int height;
+    private int mods = 0;
 
     public Window(String title, int width, int height) {
         this.handle = glfwCreateWindow(800, 600, title, MemoryUtil.NULL, MemoryUtil.NULL);
@@ -111,6 +109,10 @@ public class Window {
         return height;
     }
 
+    public boolean getVisible() {
+        return visible;
+    }
+
     public void setVisible(boolean visible) {
         if (visible) {
             glfwShowWindow(handle);
@@ -118,10 +120,6 @@ public class Window {
             glfwHideWindow(handle);
         }
         this.visible = visible;
-    }
-
-    public boolean getVisible() {
-        return visible;
     }
 
     public long getHandle() {

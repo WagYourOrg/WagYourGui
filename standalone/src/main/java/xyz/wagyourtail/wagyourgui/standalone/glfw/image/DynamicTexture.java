@@ -33,9 +33,13 @@ public class DynamicTexture implements BaseTex {
             GL11.glTexParameterf(3553, 34049, 0.0F);
         }
 
-        for(int $$5 = 0; $$5 <= mipmapLevel; ++$$5) {
+        for (int $$5 = 0; $$5 <= mipmapLevel; ++$$5) {
             GL11.glTexImage2D(3553, $$5, pixelFormat.glFormat(), width >> $$5, height >> $$5, 0, 6408, 5121, (ByteBuffer) null);
         }
+    }
+
+    public static int generateTextureId() {
+        return GL11.glGenTextures();
     }
 
     public void upload() {
@@ -52,10 +56,6 @@ public class DynamicTexture implements BaseTex {
         }
 
         GL11.glBindTexture(GL11.GL_TEXTURE_2D, id);
-    }
-
-    public static int generateTextureId() {
-        return GL11.glGenTextures();
     }
 
     @Nullable

@@ -2,19 +2,18 @@ package xyz.wagyourtail.wagyourgui.api.overlay;
 
 import xyz.wagyourtail.wagyourgui.api.element.Renderable;
 import xyz.wagyourtail.wagyourgui.api.element.Themeable;
-import xyz.wagyourtail.wagyourgui.api.keys.Keyboard;
+import xyz.wagyourtail.wagyourgui.api.keys.Key;
 import xyz.wagyourtail.wagyourgui.api.theme.Theme;
 
 import java.util.Arrays;
 
-public abstract class AbstractOverlay implements OverlayElement, Renderable, Themeable<Theme.OverlayTheme> {
+public abstract class Overlay implements OverlayElement, Renderable, Themeable<Theme.OverlayTheme> {
+    public boolean shouldClose = false;
     protected int x, y, width, height;
     private Theme.OverlayTheme theme = Theme.currentTheme.overlay[0];
-
     private OverlayElement overlay;
-    public boolean shouldClose = false;
 
-    public AbstractOverlay(int x, int y, int width, int height) {
+    public Overlay(int x, int y, int width, int height) {
         this.x = x;
         this.y = y;
         this.width = width;
@@ -44,23 +43,13 @@ public abstract class AbstractOverlay implements OverlayElement, Renderable, The
     }
 
     @Override
-    public int getY() {
-        return y;
-    }
-
-    @Override
-    public int getWidth() {
-        return width;
-    }
-
-    @Override
-    public int getHeight() {
-        return height;
-    }
-
-    @Override
     public void setX(int x) {
         this.x = x;
+    }
+
+    @Override
+    public int getY() {
+        return y;
     }
 
     @Override
@@ -69,8 +58,18 @@ public abstract class AbstractOverlay implements OverlayElement, Renderable, The
     }
 
     @Override
+    public int getWidth() {
+        return width;
+    }
+
+    @Override
     public void setWidth(int width) {
         this.width = width;
+    }
+
+    @Override
+    public int getHeight() {
+        return height;
     }
 
     @Override
@@ -104,21 +103,8 @@ public abstract class AbstractOverlay implements OverlayElement, Renderable, The
     }
 
     @Override
-    public void setEnabled(boolean enabled) {
-    }
-
-    @Override
-    public boolean isEnabled() {
-        return true;
-    }
-
-    @Override
-    public void setVisible(boolean visible) {
-    }
-
-    @Override
-    public boolean isVisible() {
-        return true;
+    public int getThemeIndex() {
+        return Arrays.asList(Theme.currentTheme.overlay).indexOf(theme);
     }
 
     @Override
@@ -127,23 +113,18 @@ public abstract class AbstractOverlay implements OverlayElement, Renderable, The
     }
 
     @Override
-    public int getThemeIndex() {
-        return Arrays.asList(Theme.currentTheme.overlay).indexOf(theme);
-    }
-
-    @Override
     public Theme.OverlayTheme getTheme() {
         return theme;
     }
 
     @Override
-    public void setOverlay(OverlayElement overlay) {
-        this.overlay = overlay;
+    public OverlayElement getOverlay() {
+        return overlay;
     }
 
     @Override
-    public OverlayElement getOverlay() {
-        return overlay;
+    public void setOverlay(OverlayElement overlay) {
+        this.overlay = overlay;
     }
 
     @Override
@@ -159,7 +140,7 @@ public abstract class AbstractOverlay implements OverlayElement, Renderable, The
     @Override
     public boolean onKeyPressed(int keyCode, int scanCode, int modifiers) {
         if (overlay != null) return overlay.onKeyPressed(keyCode, scanCode, modifiers);
-        if (Keyboard.getKey(keyCode).equals(Keyboard.ESCAPE)) {
+        if (Key.getKey(keyCode).equals(Key.ESCAPE)) {
             onClose();
             return true;
         }

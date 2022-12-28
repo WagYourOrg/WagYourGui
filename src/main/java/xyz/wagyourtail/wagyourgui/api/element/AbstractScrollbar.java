@@ -5,12 +5,12 @@ import xyz.wagyourtail.wagyourgui.api.theme.Theme;
 import java.util.Arrays;
 import java.util.function.Consumer;
 
-public abstract class AbstractScrollbar<T extends AbstractScrollbar> extends AbstractElement implements Themeable<Theme.ScrollbarTheme> {
+public abstract class AbstractScrollbar<T extends AbstractScrollbar> extends AbstractElement implements Themeable<Theme.ScrollbarTheme>, Disableable {
+    public boolean disabled = false;
+    public boolean hidden = false;
     private Theme.ScrollbarTheme theme = Theme.currentTheme.scrollbar[0];
-
     private double scroll = 0;
     private double scrollPages = 1;
-
     private Consumer<T> onScroll;
 
     public AbstractScrollbar(int x, int y, int width, int height, double pages, Consumer<T> onScroll) {
@@ -20,13 +20,13 @@ public abstract class AbstractScrollbar<T extends AbstractScrollbar> extends Abs
     }
 
     @Override
-    public void setThemeIndex(int index) {
-        this.theme = Theme.currentTheme.scrollbar[index % Theme.currentTheme.scrollbar.length];
+    public int getThemeIndex() {
+        return Arrays.asList(Theme.currentTheme.scrollbar).indexOf(theme);
     }
 
     @Override
-    public int getThemeIndex() {
-        return Arrays.asList(Theme.currentTheme.scrollbar).indexOf(theme);
+    public void setThemeIndex(int index) {
+        this.theme = Theme.currentTheme.scrollbar[index % Theme.currentTheme.scrollbar.length];
     }
 
     @Override
@@ -34,12 +34,12 @@ public abstract class AbstractScrollbar<T extends AbstractScrollbar> extends Abs
         return theme;
     }
 
-    public void setScroll(double scroll) {
-        this.scroll = Math.max(0, Math.min(scroll, scrollPages));
-    }
-
     public double getScroll() {
         return scroll;
+    }
+
+    public void setScroll(double scroll) {
+        this.scroll = Math.max(0, Math.min(scroll, scrollPages));
     }
 
     public double getScrollPages() {
@@ -68,5 +68,25 @@ public abstract class AbstractScrollbar<T extends AbstractScrollbar> extends Abs
         if (scroll < 0) scroll = 0;
         if (scroll > scrollPages - 1) scroll = scrollPages - 1;
         return true;
+    }
+
+    @Override
+    public boolean isDisabled() {
+        return disabled;
+    }
+
+    @Override
+    public void setDisabled(boolean disabled) {
+        this.disabled = disabled;
+    }
+
+    @Override
+    public boolean isHidden() {
+        return hidden;
+    }
+
+    @Override
+    public void setHidden(boolean hidden) {
+        this.hidden = hidden;
     }
 }

@@ -7,6 +7,7 @@ import xyz.wagyourtail.wagyourgui.api.render.Texture;
 import xyz.wagyourtail.wagyourgui.api.screen.Screen;
 import xyz.wagyourtail.wagyourgui.standalone.glfw.GLBuilder;
 import xyz.wagyourtail.wagyourgui.standalone.glfw.GLFWSession;
+import xyz.wagyourtail.wagyourgui.standalone.glfw.ResourceLocation;
 import xyz.wagyourtail.wagyourgui.standalone.glfw.image.BaseTex;
 import xyz.wagyourtail.wagyourgui.standalone.glfw.image.DynamicTexture;
 import xyz.wagyourtail.wagyourgui.standalone.glfw.image.NativeImage;
@@ -17,8 +18,7 @@ import java.util.List;
 
 public class SRenderer implements Renderer<STexture<BaseTex>, SMutTexture> {
     public static SRenderer INSTANCE;
-
-    private GLFWSession session = new GLFWSession();
+    public final GLFWSession session = new GLFWSession();
 
     public SRenderer() {
         INSTANCE = this;
@@ -316,8 +316,8 @@ public class SRenderer implements Renderer<STexture<BaseTex>, SMutTexture> {
             GLBuilder.getImmediate().begin(GL11.GL_TRIANGLE_STRIP)
                     .vertex(0, thickness / 2).color(color).next()
                     .vertex(1, thickness / 2).color(color).next()
-                    .vertex(1, - thickness / 2).color(color).next()
-                    .vertex(0, - thickness / 2).color(color).next()
+                    .vertex(1, -thickness / 2).color(color).next()
+                    .vertex(0, -thickness / 2).color(color).next()
                     .end();
         }
         GL11.glPopMatrix();
@@ -335,31 +335,33 @@ public class SRenderer implements Renderer<STexture<BaseTex>, SMutTexture> {
 
     @Override
     public STexture<BaseTex> getTexture(String identifier) {
-        BaseTex tex = session.textures.get(identifier);
+        BaseTex tex = session.textures.get(ResourceLocation.of(identifier));
         return new STexture<>(tex, identifier);
     }
 
     @Override
     public SMutTexture createMutableTexture(String identifier, int width, int height) {
-        if (session.textures.containsKey(identifier)) {
+        ResourceLocation loc = ResourceLocation.of(identifier);
+        if (session.textures.containsKey(loc)) {
             throw new IllegalArgumentException("Texture with identifier " + identifier + " already exists");
         }
         NativeImage image = new NativeImage(width, height, true);
         DynamicTexture tex = new DynamicTexture(image);
-        session.textures.put(identifier, tex);
+        session.textures.put(loc, tex);
         return new SMutTexture(tex, identifier);
     }
 
     @Override
     public SMutTexture createMutableTexture(String identifier, Texture image) {
-        if (session.textures.containsKey(identifier)) {
+        ResourceLocation loc = ResourceLocation.of(identifier);
+        if (session.textures.containsKey(loc)) {
             throw new IllegalArgumentException("Texture with identifier " + identifier + " already exists");
         }
         if (image instanceof SMutTexture) {
             NativeImage i = new NativeImage(((SMutTexture) image).getWidth(), ((SMutTexture) image).getHeight(), true);
             i.copyFrom(((SMutTexture) image).getImage().getPixels());
             DynamicTexture tex = new DynamicTexture(i);
-            session.textures.put(identifier, tex);
+            session.textures.put(loc, tex);
             return new SMutTexture(tex, identifier);
         } else {
             throw new UnsupportedOperationException("Cannot create mutable texture from non-mutable texture yet");

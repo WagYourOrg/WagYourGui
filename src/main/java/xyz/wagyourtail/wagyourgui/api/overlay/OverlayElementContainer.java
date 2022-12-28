@@ -1,19 +1,19 @@
 package xyz.wagyourtail.wagyourgui.api.overlay;
 
 import xyz.wagyourtail.wagyourgui.api.container.ElementContainer;
+import xyz.wagyourtail.wagyourgui.api.element.Disableable;
 import xyz.wagyourtail.wagyourgui.api.element.Element;
 import xyz.wagyourtail.wagyourgui.api.element.Interactable;
 import xyz.wagyourtail.wagyourgui.api.element.Renderable;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
-public abstract class AbstractOverlayElementContainer extends AbstractOverlay implements ElementContainer {
+public abstract class OverlayElementContainer extends Overlay implements ElementContainer {
 
-    private final List<Element> elements = new ArrayList<>();
+    private final Deque<Element> elements = new LinkedList<>();
     private Interactable focusedElement = null;
 
-    public AbstractOverlayElementContainer(int x, int y, int width, int height) {
+    public OverlayElementContainer(int x, int y, int width, int height) {
         super(x, y, width, height);
     }
 
@@ -44,6 +44,7 @@ public abstract class AbstractOverlayElementContainer extends AbstractOverlay im
         if (super.onClicked(mouseX, mouseY, button, mods)) return true;
         for (Element e : elements) {
             if (e instanceof Interactable && ((Interactable) e).shouldFocus(mouseX, mouseY)) {
+                if (e instanceof Disableable && ((Disableable) e).isDisabled()) continue;
                 if (focusedElement != e) {
                     Interactable old = focusedElement;
                     focusedElement = (Interactable) e;
@@ -55,7 +56,7 @@ public abstract class AbstractOverlayElementContainer extends AbstractOverlay im
                 break;
             }
         }
-        if (focusedElement != null && !focusedElement.shouldFocus(mouseX, mouseY)) {
+        if (focusedElement != null && (!focusedElement.shouldFocus(mouseX, mouseY) || (focusedElement instanceof Disableable && ((Disableable) focusedElement).isDisabled()))) {
             Interactable old = focusedElement;
             focusedElement = null;
             old.onFocused(false);
@@ -123,8 +124,10 @@ public abstract class AbstractOverlayElementContainer extends AbstractOverlay im
     @Override
     public void onRender(int mouseX, int mouseY) {
         super.onRender(mouseX, mouseY);
-        for (Element e : elements) {
-            if (e instanceof Renderable && ((Renderable) e).isVisible()) {
+        Iterator<Element> it = elements.descendingIterator();
+        while (it.hasNext()) {
+            Element e = it.next();
+            if (e instanceof Disableable && !((Disableable) e).isHidden()) {
                 ((Renderable) e).onRender(mouseX, mouseY);
             }
         }

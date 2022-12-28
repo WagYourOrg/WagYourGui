@@ -20,18 +20,30 @@ import static org.lwjgl.opengl.GL11C.GL_DEPTH_BUFFER_BIT;
 import static org.lwjgl.opengl.GL11C.glClearColor;
 
 public class GLFWSession implements ResizeListener, MouseListener, KeyListener {
+    public final Map<ResourceLocation, BaseTex> textures = new HashMap<>();
+    private final double[] sX = new double[6];
+    private final double[] sY = new double[6];
     public Window window;
     public Font font;
     public long fps;
     public int GUI_SCALE = 2;
-    public final Map<String, BaseTex> textures = new HashMap<>();
-
     private boolean running = false;
-
-    private Screen screen = new Screen(null);
+    private Screen screen = new Screen(null) {
+    };
 
     public Screen getScreen() {
         return screen;
+    }
+
+    public void setScreen(Screen screen) {
+        if (screen == null) this.screen = new Screen(null) {
+            @Override
+            public void onRender(int mouseX, int mouseY) {
+                RENDERER.centeredString("No Screen", width / 2, height / 2 - RENDERER.getStringHeight() / 2, 0xFFFFFFFF);
+            }
+        };
+        else this.screen = screen;
+        this.screen.onInit(window.getWidth() / GUI_SCALE, window.getHeight() / GUI_SCALE, false);
     }
 
     public boolean isRunning() {
@@ -79,9 +91,9 @@ public class GLFWSession implements ResizeListener, MouseListener, KeyListener {
             GLFWVidMode vidmode = glfwGetVideoMode(glfwGetPrimaryMonitor());
 
             glfwSetWindowPos(
-                window.handle,
-                (vidmode.width() - pWidth.get(0)) / 2,
-                (vidmode.height() - pHeight.get(0)) / 2
+                    window.handle,
+                    (vidmode.width() - pWidth.get(0)) / 2,
+                    (vidmode.height() - pHeight.get(0)) / 2
             );
         }
 
@@ -92,19 +104,8 @@ public class GLFWSession implements ResizeListener, MouseListener, KeyListener {
         // Enable v-sync
         glfwSwapInterval(1);
 
-        font = new Font("UbuntuMono-R.ttf");
+        font = new Font(new ResourceLocation("wagyourgui", "fonts/UbuntuMono.json"));
         window.setVisible(true);
-    }
-
-    public void setScreen(Screen screen) {
-        if (screen == null) this.screen = new Screen(null) {
-            @Override
-            public void onRender(int mouseX, int mouseY) {
-                RENDERER.centeredString("No Screen", width / 2, height / 2 - RENDERER.getStringHeight() / 2, 0xFFFFFFFF);
-            }
-        };
-        else this.screen = screen;
-        this.screen.onInit(window.getWidth() / GUI_SCALE, window.getHeight() / GUI_SCALE, false);
     }
 
     public void loop() {
@@ -208,9 +209,6 @@ public class GLFWSession implements ResizeListener, MouseListener, KeyListener {
                 break;
         }
     }
-
-    private final double[] sX = new double[6];
-    private final double[] sY = new double[6];
 
     @Override
     public void onMousePos(double x, double y) {

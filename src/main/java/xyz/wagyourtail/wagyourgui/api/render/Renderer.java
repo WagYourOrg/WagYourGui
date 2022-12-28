@@ -9,9 +9,11 @@ public interface Renderer<T extends Texture, M extends MutableTexture> {
     void rect(int x, int y, int width, int height, int color);
 
     void texturedRect(int x, int y, int width, int height, int u, int v, int textureWidth, int textureHeight, Texture tex);
+
     void texturedRect(int x, int y, int width, int height, int u, int v, int uw, int vh, int textureWidth, int textureHeight, Texture tex);
 
     void texturedRect(int x, int y, int width, int height, int u, int v, int textureWidth, int textureHeight, Texture tex, int color);
+
     void texturedRect(int x, int y, int width, int height, int u, int v, int uw, int vh, int textureWidth, int textureHeight, Texture tex, int color);
 
     void string(String text, int x, int y, int color);

@@ -1,11 +1,12 @@
-package xyz.wagyourtail.wagyourgui.api.overlay;
+package xyz.wagyourtail.wagyourgui.api.overlay.impl;
 
-import xyz.wagyourtail.wagyourgui.api.element.Button;
+import xyz.wagyourtail.wagyourgui.api.element.impl.Button;
+import xyz.wagyourtail.wagyourgui.api.overlay.OverlayElementContainer;
 import xyz.wagyourtail.wagyourgui.api.render.ColoredString;
 
 import java.util.List;
 
-public class WarningOverlay extends AbstractOverlayElementContainer {
+public class WarningOverlay extends OverlayElementContainer {
     private final List<Object> messageLines;
 
     public WarningOverlay(int x, int y, int width, int height, ColoredString message) {
@@ -22,7 +23,7 @@ public class WarningOverlay extends AbstractOverlayElementContainer {
     @Override
     public void onOpened() {
 
-        addElement(new Button(x, y + height - 12, width, 12, "OK", (b) -> {
+        addElement(new Button(x + 1, y + height - 13, width - 2, 12, "OK", (b) -> {
             shouldClose = true;
         }));
 

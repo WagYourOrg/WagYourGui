@@ -18,13 +18,12 @@ import xyz.wagyourtail.wagyourgui.api.screen.Screen;
 
 public class MCRenderer extends GuiComponent implements Renderer<MCTexture<AbstractTexture>, MCMutableTexture> {
     public static MCRenderer INSTANCE;
+    Minecraft mc = Minecraft.getInstance();
+    PoseStack pose;
 
     public MCRenderer() {
         INSTANCE = this;
     }
-
-    Minecraft mc = Minecraft.getInstance();
-    PoseStack pose;
 
     public void bindMatrixStack(PoseStack pose) {
         this.pose = pose;
@@ -65,10 +64,10 @@ public class MCRenderer extends GuiComponent implements Renderer<MCTexture<Abstr
         RenderSystem.setShader(GameRenderer::getPositionTexShader);
         BufferBuilder $$10 = Tesselator.getInstance().getBuilder();
         $$10.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_COLOR_TEX);
-        $$10.vertex(matrix, (float)x1, (float)y2, 0).color(color).uv(u1, v2).endVertex();
-        $$10.vertex(matrix, (float)x2, (float)y2, 0).color(color).uv(u2, v2).endVertex();
-        $$10.vertex(matrix, (float)x2, (float)y1, 0).color(color).uv(u2, v1).endVertex();
-        $$10.vertex(matrix, (float)x1, (float)y1, 0).color(color).uv(u1, v1).endVertex();
+        $$10.vertex(matrix, (float) x1, (float) y2, 0).color(color).uv(u1, v2).endVertex();
+        $$10.vertex(matrix, (float) x2, (float) y2, 0).color(color).uv(u2, v2).endVertex();
+        $$10.vertex(matrix, (float) x2, (float) y1, 0).color(color).uv(u2, v1).endVertex();
+        $$10.vertex(matrix, (float) x1, (float) y1, 0).color(color).uv(u1, v1).endVertex();
         BufferUploader.drawWithShader($$10.end());
     }
 
@@ -91,10 +90,10 @@ public class MCRenderer extends GuiComponent implements Renderer<MCTexture<Abstr
         RenderSystem.setShader(GameRenderer::getPositionTexShader);
         BufferBuilder $$10 = Tesselator.getInstance().getBuilder();
         $$10.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_COLOR_TEX);
-        $$10.vertex(matrix, (float)x1, (float)y2, 0).color(color).uv(u1, v2).endVertex();
-        $$10.vertex(matrix, (float)x2, (float)y2, 0).color(color).uv(u2, v2).endVertex();
-        $$10.vertex(matrix, (float)x2, (float)y1, 0).color(color).uv(u2, v1).endVertex();
-        $$10.vertex(matrix, (float)x1, (float)y1, 0).color(color).uv(u1, v1).endVertex();
+        $$10.vertex(matrix, (float) x1, (float) y2, 0).color(color).uv(u1, v2).endVertex();
+        $$10.vertex(matrix, (float) x2, (float) y2, 0).color(color).uv(u2, v2).endVertex();
+        $$10.vertex(matrix, (float) x2, (float) y1, 0).color(color).uv(u2, v1).endVertex();
+        $$10.vertex(matrix, (float) x1, (float) y1, 0).color(color).uv(u1, v1).endVertex();
         BufferUploader.drawWithShader($$10.end());
     }
 

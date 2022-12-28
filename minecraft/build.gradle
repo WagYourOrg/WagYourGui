@@ -2,8 +2,8 @@ plugins {
     id 'xyz.wagyourtail.unimined' version '0.3.5' apply false
 }
 
+
 import groovy.json.JsonSlurper
-import groovy.xml.XmlSlurper
 
 def getMCPMappings(vers) {
     switch (vers) {
@@ -23,8 +23,8 @@ def getMCPMappings(vers) {
     var latestSnapshot = Collections.max(snapshot)
 
     return [
-        "stable": "$latest-$vers",
-        "snapshot": "$latestSnapshot-$vers"
+            "stable"  : "$latest-$vers",
+            "snapshot": "$latestSnapshot-$vers"
     ]
 }
 

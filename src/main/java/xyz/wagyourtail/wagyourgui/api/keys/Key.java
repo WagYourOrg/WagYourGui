@@ -3,7 +3,7 @@ package xyz.wagyourtail.wagyourgui.api.keys;
 import java.util.HashMap;
 import java.util.Map;
 
-public enum Keyboard {
+public enum Key {
     KEY_UNKNOWN(-1),
     SPACE(32),
     APOSTROPHE(39),
@@ -125,32 +125,31 @@ public enum Keyboard {
     RIGHT_ALT(346),
     RIGHT_SUPER(347),
     MENU(348),
-    LAST(Keyboard.MENU.getKeyCode());
-    ;
+    LAST(Key.MENU.getKeyCode());;
 
-    private static final Map<Integer, Keyboard> KEY_MAP = new HashMap<>();
+    private static final Map<Integer, Key> KEY_MAP = new HashMap<>();
 
     static {
-        for (Keyboard key : values()) {
+        for (Key key : values()) {
             KEY_MAP.put(key.getKeyCode(), key);
         }
     }
 
     private final int code;
 
-    Keyboard(int code) {
+    Key(int code) {
         this.code = code;
+    }
+
+    public static Key getKey(int code) {
+        return KEY_MAP.get(code);
+    }
+
+    public static Key getKey(String name) {
+        return Key.valueOf(name);
     }
 
     public int getKeyCode() {
         return code;
-    }
-
-    public static Keyboard getKey(int code) {
-        return KEY_MAP.get(code);
-    }
-
-    public static Keyboard getKey(String name) {
-        return Keyboard.valueOf(name);
     }
 }

@@ -1,5 +1,6 @@
-package xyz.wagyourtail.wagyourgui.api.element;
+package xyz.wagyourtail.wagyourgui.api.element.impl;
 
+import xyz.wagyourtail.wagyourgui.api.element.AbstractScrollbar;
 import xyz.wagyourtail.wagyourgui.api.theme.Theme;
 
 import java.util.function.Consumer;
@@ -54,7 +55,7 @@ public class VerticalScrollbar extends AbstractScrollbar<VerticalScrollbar> {
             RENDERER.rect(x, y, x + theme.borderWidth, y + height, theme.borderColor);
             RENDERER.rect(x + width - theme.borderWidth, y, x + width, y + height, theme.borderColor);
             // draw bg
-            RENDERER.rect(x + theme.borderWidth, y + theme.borderWidth, x + width - theme.borderWidth * 2, y + height - theme.borderWidth * 2, enabled ? hovered ? theme.hoverBgColor : theme.bgColor : theme.disabledBgColor);
+            RENDERER.rect(x + theme.borderWidth, y + theme.borderWidth, x + width - theme.borderWidth * 2, y + height - theme.borderWidth * 2, !disabled ? hovered ? theme.hoverBgColor : theme.bgColor : theme.disabledBgColor);
             // draw scrollbar
             RENDERER.rect(x + theme.borderWidth, (int) (y + (getScroll() * (height - theme.borderWidth * 2) / getScrollPages())), x + width - theme.borderWidth * 2, (int) (y + (getScroll() + 1) * (height - theme.borderWidth * 2) / getScrollPages()), theme.sbColor);
         }

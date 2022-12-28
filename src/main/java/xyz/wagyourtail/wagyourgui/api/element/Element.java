@@ -4,17 +4,17 @@ public interface Element {
 
     int getX();
 
-    int getY();
-
-    int getWidth();
-
-    int getHeight();
-
     void setX(int x);
+
+    int getY();
 
     void setY(int y);
 
+    int getWidth();
+
     void setWidth(int width);
+
+    int getHeight();
 
     void setHeight(int height);
 
@@ -25,4 +25,5 @@ public interface Element {
     void setBounds(int x, int y, int width, int height);
 
     boolean isWithinBounds(int x, int y);
+
 }

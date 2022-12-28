@@ -8,4 +8,9 @@ public class PlaceShipScreen extends Screen {
     public PlaceShipScreen(Screen parent, GameStateMachine game) {
         super(parent);
     }
+
+    @Override
+    public void onInit(int width, int height, boolean transparentBg) {
+        super.onInit(width, height, transparentBg);
+    }
 }

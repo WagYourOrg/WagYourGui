@@ -7,9 +7,6 @@ public abstract class AbstractElement implements Element, Interactable, Renderab
     protected int width;
     protected int height;
 
-    protected boolean visible = true;
-    protected boolean enabled = true;
-
     public AbstractElement(int x, int y, int width, int height) {
         this.x = x;
         this.y = y;
@@ -23,23 +20,13 @@ public abstract class AbstractElement implements Element, Interactable, Renderab
     }
 
     @Override
-    public int getY() {
-        return y;
-    }
-
-    @Override
-    public int getWidth() {
-        return width;
-    }
-
-    @Override
-    public int getHeight() {
-        return height;
-    }
-
-    @Override
     public void setX(int x) {
         this.x = x;
+    }
+
+    @Override
+    public int getY() {
+        return y;
     }
 
     @Override
@@ -48,8 +35,18 @@ public abstract class AbstractElement implements Element, Interactable, Renderab
     }
 
     @Override
+    public int getWidth() {
+        return width;
+    }
+
+    @Override
     public void setWidth(int width) {
         this.width = width;
+    }
+
+    @Override
+    public int getHeight() {
+        return height;
     }
 
     @Override
@@ -80,25 +77,5 @@ public abstract class AbstractElement implements Element, Interactable, Renderab
     @Override
     public boolean isWithinBounds(int x, int y) {
         return x >= this.x && x <= this.x + this.width && y >= this.y && y <= this.y + this.height;
-    }
-
-    @Override
-    public void setVisible(boolean visible) {
-        this.visible = visible;
-    }
-
-    @Override
-    public boolean isVisible() {
-        return visible;
-    }
-
-    @Override
-    public void setEnabled(boolean enabled) {
-        this.enabled = enabled;
-    }
-
-    @Override
-    public boolean isEnabled() {
-        return enabled;
     }
 }

@@ -2,8 +2,9 @@ package xyz.wagyourtail.wagyourgui.api.element;
 
 public interface Themeable<T> {
 
-    void setThemeIndex(int index);
     int getThemeIndex();
+
+    void setThemeIndex(int index);
 
     T getTheme();
 }

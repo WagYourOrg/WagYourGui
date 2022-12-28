@@ -19,6 +19,8 @@ public abstract class GLBuilder {
 
     public abstract GLBuilder vertex(float x, float y);
 
+    public abstract GLBuilder vertex(float x, float y, float z);
+
     public abstract GLBuilder color(int r, int g, int b, int a);
 
     public abstract GLBuilder color(float r, float g, float b, float a);
@@ -41,12 +43,21 @@ public abstract class GLBuilder {
         POS_TEX
     }
 
-    private record Pos(float x, float y) {}
-    private record Col(float r, float g, float b, float a) {}
-    private record Tex(float u, float v) {}
+    private record Pos(float x, float y, float z) {
+    }
+
+    private record Col(float r, float g, float b, float a) {
+    }
+
+    private record Tex(float u, float v) {
+    }
 
     public static class ImmediateBuilder extends GLBuilder {
         private static ImmediateBuilder instance = new ImmediateBuilder();
+        private VertexFormat format;
+        private Pos pos;
+        private Col col;
+        private Tex tex;
 
         private ImmediateBuilder() {
             super();
@@ -55,11 +66,6 @@ public abstract class GLBuilder {
         public static ImmediateBuilder getInstance() {
             return instance;
         }
-
-        private VertexFormat format;
-        private Pos pos;
-        private Col col;
-        private Tex tex;
 
         @Override
         public GLBuilder begin(int mode, VertexFormat format) {
@@ -85,16 +91,21 @@ public abstract class GLBuilder {
 
         @Override
         public GLBuilder vertex(float x, float y) {
+            return vertex(x, y, 0);
+        }
+
+        @Override
+        public GLBuilder vertex(float x, float y, float z) {
             if (!state) {
                 throw new RuntimeException("not building");
             }
-            if (Float.isNaN(x) || Float.isNaN(y)) {
+            if (Float.isNaN(x) || Float.isNaN(y) || Float.isNaN(z)) {
                 throw new RuntimeException("invalid position");
             }
             if (pos != null) {
                 throw new RuntimeException("already set position");
             }
-            pos = new Pos(x, y);
+            pos = new Pos(x, y, z);
             return this;
         }
 

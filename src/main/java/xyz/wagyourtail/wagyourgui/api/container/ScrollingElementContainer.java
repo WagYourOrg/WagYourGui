@@ -1,13 +1,13 @@
 package xyz.wagyourtail.wagyourgui.api.container;
 
-import xyz.wagyourtail.wagyourgui.api.element.*;
+import xyz.wagyourtail.wagyourgui.api.element.Disableable;
+import xyz.wagyourtail.wagyourgui.api.element.Element;
+import xyz.wagyourtail.wagyourgui.api.element.Renderable;
+import xyz.wagyourtail.wagyourgui.api.element.impl.VerticalScrollbar;
 
-import java.util.HashSet;
-import java.util.Set;
+import java.util.Iterator;
 
-public class ScrollingElementContainer extends AbstractElement implements ElementContainer {
-    protected final Set<Element> elements = new HashSet<>();
-    private Interactable focusedElement = null;
+public abstract class ScrollingElementContainer extends PositionedElementContainer {
     public final VerticalScrollbar scrollbar;
     protected int offsetY = 0;
 
@@ -19,7 +19,7 @@ public class ScrollingElementContainer extends AbstractElement implements Elemen
     public void onScrolled(VerticalScrollbar sb) {
         int newOffset = (int) (sb.getScroll() * height);
         if (newOffset != offsetY) {
-            int diff =  offsetY - newOffset;
+            int diff = offsetY - newOffset;
             offsetY = newOffset;
             for (Element e : elements) {
                 if (e == scrollbar) continue;
@@ -40,12 +40,14 @@ public class ScrollingElementContainer extends AbstractElement implements Elemen
 
         int diff = max - min;
         scrollbar.setScrollPages(diff / (double) height);
-        scrollbar.setVisible(scrollbar.getScrollPages() != 1);
+        scrollbar.setHidden(scrollbar.getScrollPages() == 1);
     }
 
     @Override
     public <T extends Element> T addElement(T element) {
         elements.add(element);
+        // update y position
+        element.setY(element.getY() + offsetY);
         updateScrollPages();
         return element;
     }
@@ -63,89 +65,24 @@ public class ScrollingElementContainer extends AbstractElement implements Elemen
     }
 
     @Override
-    public void onFocused(boolean focused) {
-        if (!focused) {
-            Interactable old = focusedElement;
-            focusedElement = null;
-            if (old != null) old.onFocused(false);
-        }
-    }
-
-    @Override
     public boolean onScrolled(int mouseX, int mouseY, double scroll) {
         if (focusedElement == null) {
             scrollbar.onScrolled(mouseX, mouseY, scroll);
         } else {
-            focusedElement.onScrolled(mouseX, mouseY, scroll);
+            super.onScrolled(mouseX, mouseY, scroll);
         }
         return true;
-    }
-
-    @Override
-    public boolean onDragged(int mouseX, int mouseY, int button, double deltaX, double deltaY) {
-        if (focusedElement == null) {
-            scrollbar.onDragged(mouseX, mouseY, button, deltaX, deltaY);
-        } else {
-            focusedElement.onDragged(mouseX, mouseY, button, deltaX, deltaY);
-        }
-        return true;
-    }
-
-    @Override
-    public boolean onKeyReleased(int keyCode, int scanCode, int modifiers) {
-        if (focusedElement != null) {
-            return focusedElement.onKeyReleased(keyCode, scanCode, modifiers);
-        }
-        return false;
-    }
-
-    @Override
-    public boolean onKeyPressed(int keyCode, int scanCode, int modifiers) {
-        if (focusedElement != null) {
-            return focusedElement.onKeyPressed(keyCode, scanCode, modifiers);
-        }
-        return false;
-    }
-
-    @Override
-    public boolean onCharTyped(char character, int mods) {
-        if (focusedElement != null) {
-            return focusedElement.onCharTyped(character, mods);
-        }
-        return false;
-    }
-
-    @Override
-    public boolean onClicked(int mouseX, int mouseY, int button, int mods) {
-        for (Element e : elements) {
-            if (e instanceof Interactable && ((Interactable) e).shouldFocus(mouseX, mouseY)) {
-                if (focusedElement != e) {
-                    Interactable old = focusedElement;
-                    focusedElement = (Interactable) e;
-                    if (old != null) {
-                        old.onFocused(false);
-                    }
-                    focusedElement.onFocused(true);
-                }
-            }
-            break;
-        }
-        if (focusedElement != null && !focusedElement.shouldFocus(mouseX, mouseY)) {
-            Interactable old = focusedElement;
-            focusedElement = null;
-            old.onFocused(false);
-        }
-        if (focusedElement != null) {
-            return focusedElement.onClicked(mouseX, mouseY, button, mods);
-        }
-        return false;
     }
 
     @Override
     public void onRender(int mouseX, int mouseY) {
-        for (Element e : elements) {
-            if (e instanceof Renderable && ((Renderable) e).isVisible()) {
-                ((Renderable) e).onRender(mouseX, mouseY);
+        Iterator<Element> it = elements.descendingIterator();
+        while (it.hasNext()) {
+            Element e = it.next();
+            if (e instanceof Disableable && !((Disableable) e).isHidden()) {
+                if (isWithinBounds(e.getX(), e.getY()) && isWithinBounds(e.getX() + e.getWidth(), e.getY() + e.getHeight())) {
+                    ((Renderable) e).onRender(mouseX, mouseY);
+                }
             }
         }
     }

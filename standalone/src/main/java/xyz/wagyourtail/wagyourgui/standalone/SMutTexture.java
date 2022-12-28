@@ -8,6 +8,7 @@ public class SMutTexture extends STexture<DynamicTexture> implements MutableText
     public SMutTexture(DynamicTexture image, String identifier) {
         super(image, identifier);
     }
+
     @Override
     public void setPixel(int x, int y, int color) {
         assert image.getPixels() != null;

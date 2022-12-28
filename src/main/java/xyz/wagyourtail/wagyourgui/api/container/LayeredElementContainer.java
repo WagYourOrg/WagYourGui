@@ -1,16 +1,17 @@
 package xyz.wagyourtail.wagyourgui.api.container;
 
+import xyz.wagyourtail.wagyourgui.api.element.Disableable;
 import xyz.wagyourtail.wagyourgui.api.element.Element;
 import xyz.wagyourtail.wagyourgui.api.element.Interactable;
 import xyz.wagyourtail.wagyourgui.api.element.Renderable;
 
 import java.util.*;
 
-public abstract class AbstractLayeredElementContainer implements ElementContainer, Interactable, Renderable {
+public abstract class LayeredElementContainer implements ElementContainer, Interactable, Renderable {
     protected ElementLayer[] elements = new ElementLayer[1];
-    protected int topLayer = 0;
     protected Interactable focusedElement = null;
     protected int currentLayer = 0;
+
     @Override
     public <T extends Element> T addElement(T element) {
         return addElement(currentLayer, element);
@@ -52,12 +53,12 @@ public abstract class AbstractLayeredElementContainer implements ElementContaine
         }
     }
 
-    public void setCurrentLayer(int layer) {
-        currentLayer = layer;
-    }
-
     public int getCurrentLayer() {
         return currentLayer;
+    }
+
+    public void setCurrentLayer(int layer) {
+        currentLayer = layer;
     }
 
     public void setLayerVisible(int layer, boolean visible) {
@@ -82,12 +83,14 @@ public abstract class AbstractLayeredElementContainer implements ElementContaine
 
     @Override
     public boolean onClicked(int mouseX, int mouseY, int button, int mods) {
-        outer: for (int i = elements.length - 1; i >= 0; i--) {
+        outer:
+        for (int i = elements.length - 1; i >= 0; i--) {
             ElementLayer l = elements[i];
             if (l == null) continue;
             if (l.isInteractable()) {
                 for (Element e : l.getElements()) {
                     if (e instanceof Interactable && ((Interactable) e).shouldFocus(mouseX, mouseY)) {
+                        if (e instanceof Disableable && ((Disableable) e).isDisabled()) continue;
                         if (focusedElement != e) {
                             Interactable old = focusedElement;
                             focusedElement = (Interactable) e;
@@ -101,7 +104,7 @@ public abstract class AbstractLayeredElementContainer implements ElementContaine
                 }
             }
         }
-        if (focusedElement != null && !focusedElement.shouldFocus(mouseX, mouseY)) {
+        if (focusedElement != null && (!focusedElement.shouldFocus(mouseX, mouseY) || (focusedElement instanceof Disableable && ((Disableable) focusedElement).isDisabled()))) {
             Interactable old = focusedElement;
             focusedElement = null;
             old.onFocused(false);
@@ -165,8 +168,10 @@ public abstract class AbstractLayeredElementContainer implements ElementContaine
         for (ElementLayer l : elements) {
             if (l == null) continue;
             if (l.isVisible()) {
-                for (Element e : l.getElements()) {
-                    if (e instanceof Renderable && ((Renderable) e).isVisible()) {
+                Iterator<Element> it = l.getElements().descendingIterator();
+                while (it.hasNext()) {
+                    Element e = it.next();
+                    if (e instanceof Disableable && !((Disableable) e).isHidden()) {
                         ((Renderable) e).onRender(mouseX, mouseY);
                     }
                 }
@@ -176,11 +181,11 @@ public abstract class AbstractLayeredElementContainer implements ElementContaine
 
     public static class ElementLayer implements ElementContainer {
         private int layer;
-        private List<Element> elements;
+        private Deque<Element> elements;
         private boolean visible;
         private boolean interactable;
 
-        ElementLayer(List<Element> elements, int layer, boolean visible, boolean interactable) {
+        ElementLayer(Deque<Element> elements, int layer, boolean visible, boolean interactable) {
             this.elements = elements;
             this.visible = visible;
             this.interactable = interactable;
@@ -188,14 +193,14 @@ public abstract class AbstractLayeredElementContainer implements ElementContaine
         }
 
         public ElementLayer(int layer) {
-            this(new ArrayList<>(), layer, true, true);
+            this(new LinkedList<>(), layer, true, true);
         }
 
-        public List<Element> getElements() {
+        public Deque<Element> getElements() {
             return elements;
         }
 
-        public void setElements(List<Element> elements) {
+        public void setElements(Deque<Element> elements) {
             this.elements = elements;
         }
 

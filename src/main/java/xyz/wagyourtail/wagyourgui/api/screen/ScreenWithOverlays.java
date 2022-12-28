@@ -1,10 +1,10 @@
 package xyz.wagyourtail.wagyourgui.api.screen;
 
 import xyz.wagyourtail.wagyourgui.api.element.Renderable;
-import xyz.wagyourtail.wagyourgui.api.keys.Keyboard;
+import xyz.wagyourtail.wagyourgui.api.keys.Key;
 import xyz.wagyourtail.wagyourgui.api.overlay.OverlayElement;
 
-public class ScreenWithOverlays extends Screen {
+public abstract class ScreenWithOverlays extends Screen {
     protected OverlayElement overlay;
 
     public ScreenWithOverlays(Screen parent) {
@@ -43,13 +43,14 @@ public class ScreenWithOverlays extends Screen {
 
     @Override
     public void onRender(int mouseX, int mouseY) {
-        super.onRender(mouseX, mouseY);
         if (overlay != null) {
+            super.onRender(-1, -1);
+            ((Renderable) overlay).onRender(mouseX, mouseY);
             if (overlay.shouldClose()) {
                 closeOverlay();
-            } else if (overlay instanceof Renderable && ((Renderable) overlay).isVisible()) {
-                ((Renderable) overlay).onRender(mouseX, mouseY);
             }
+        } else {
+            super.onRender(mouseX, mouseY);
         }
     }
 
@@ -96,7 +97,7 @@ public class ScreenWithOverlays extends Screen {
     @Override
     public boolean onKeyPressed(int keyCode, int scanCode, int modifiers) {
         if (overlay != null) {
-            if (Keyboard.getKey(keyCode) == Keyboard.ESCAPE) {
+            if (Key.getKey(keyCode) == Key.ESCAPE) {
                 closeOverlay();
                 return true;
             }
