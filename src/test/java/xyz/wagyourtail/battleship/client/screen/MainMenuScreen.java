@@ -29,7 +29,6 @@ public class MainMenuScreen extends ScreenWithOverlays {
         super.onRender(mouseX, mouseY);
         double w = RENDERER.getStringWidth("Lots Of Text In ORder To Test Text Rendering");
         RENDERER.rect((int) (width / 2 - w / 2 - 2), height / 2 - 102, (int) (w + 4), RENDERER.getStringHeight() + 4, 0xFF151515);
-        RENDERER.centeredString("Lots Of Text In ORder To Test Text Rendering", width / 2, height / 2 - 100, 0xFFFFFFFF);
-
+        RENDERER.centeredString("Lots Of Text In Order To Test Text Rendering", width / 2, height / 2 - 100, 0xFFFFFFFF);
     }
 }

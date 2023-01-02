@@ -6,7 +6,9 @@ import xyz.wagyourtail.wagyourgui.api.element.Element;
 import xyz.wagyourtail.wagyourgui.api.element.Interactable;
 import xyz.wagyourtail.wagyourgui.api.element.Renderable;
 
-import java.util.*;
+import java.util.Deque;
+import java.util.Iterator;
+import java.util.LinkedList;
 
 public abstract class OverlayElementContainer extends Overlay implements ElementContainer {
 

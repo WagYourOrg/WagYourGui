@@ -5,7 +5,10 @@ import xyz.wagyourtail.wagyourgui.api.element.Element;
 import xyz.wagyourtail.wagyourgui.api.element.Interactable;
 import xyz.wagyourtail.wagyourgui.api.element.Renderable;
 
-import java.util.*;
+import java.util.Arrays;
+import java.util.Deque;
+import java.util.Iterator;
+import java.util.LinkedList;
 
 public abstract class LayeredElementContainer implements ElementContainer, Interactable, Renderable {
     protected ElementLayer[] elements = new ElementLayer[1];

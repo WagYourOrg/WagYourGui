@@ -2,7 +2,9 @@ package xyz.wagyourtail.wagyourgui.api.container;
 
 import xyz.wagyourtail.wagyourgui.api.element.*;
 
-import java.util.*;
+import java.util.Deque;
+import java.util.Iterator;
+import java.util.LinkedList;
 
 public abstract class PositionedElementContainer extends AbstractElement implements ElementContainer {
     protected final Deque<Element> elements = new LinkedList<>();
