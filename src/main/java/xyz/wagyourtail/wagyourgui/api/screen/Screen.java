@@ -87,7 +87,7 @@ public abstract class Screen extends LayeredElementContainer implements Interact
             }
             Renderable.RENDERER.rect(0, 0, width, height, bgColor);
         } else {
-            Renderable.RENDERER.texturedRect(0, 0, width, height, 0, 0, 16, 16, getTheme().bgTexture);
+            Renderable.RENDERER.texturedRect(0, 0, width, height, getTheme().bgTexture, 0, 0, 16, 16);
         }
         // draw elements
         super.onRender(mouseX, mouseY);

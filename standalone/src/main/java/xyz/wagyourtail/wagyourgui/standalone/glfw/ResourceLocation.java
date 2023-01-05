@@ -49,7 +49,7 @@ public record ResourceLocation(String domain, String path) {
     }
 
     public InputStream getResource() throws IOException {
-        Path path = Paths.get(this.getLocation());
+        Path path = Paths.get("resources", this.getLocation());
         if (Files.isReadable(path)) {
             return Files.newInputStream(path);
         } else {

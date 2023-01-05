@@ -83,12 +83,12 @@ public class Button extends AbstractElement implements Themeable<Theme.ButtonThe
         if (getTheme().bgTexture != null) {
             if (!disabled) {
                 if (hovered) {
-                    RENDERER.texturedRect(x, y, width, height, 40, 0, 200, 20, 256, 256, theme.bgTexture);
+                    RENDERER.texturedRect(x, y, width, height, theme.bgTexture, 40, 0, 200, 20, 256, 256);
                 } else {
-                    RENDERER.texturedRect(x, y, width, height, 20, 0, 200, 20, 256, 256, theme.bgTexture);
+                    RENDERER.texturedRect(x, y, width, height, theme.bgTexture, 20, 0, 200, 20, 256, 256);
                 }
             } else {
-                RENDERER.texturedRect(x, y, width, height, 0, 0, 256, 256, theme.bgTexture);
+                RENDERER.texturedRect(x, y, width, height, theme.bgTexture, 0, 0, 256, 256);
             }
         } else {
             RENDERER.rect(x, y, width, theme.borderWidth, theme.borderColor);

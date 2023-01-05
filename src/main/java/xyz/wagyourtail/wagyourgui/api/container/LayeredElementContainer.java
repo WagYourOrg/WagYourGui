@@ -174,7 +174,7 @@ public abstract class LayeredElementContainer implements ElementContainer, Inter
                 Iterator<Element> it = l.getElements().descendingIterator();
                 while (it.hasNext()) {
                     Element e = it.next();
-                    if (e instanceof Disableable && !((Disableable) e).isHidden()) {
+                    if (e instanceof Renderable && (!(e instanceof Disableable) || !((Disableable) e).isHidden())) {
                         ((Renderable) e).onRender(mouseX, mouseY);
                     }
                 }

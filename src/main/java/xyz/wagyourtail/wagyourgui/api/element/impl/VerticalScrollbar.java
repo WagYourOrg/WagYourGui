@@ -45,9 +45,12 @@ public class VerticalScrollbar extends AbstractScrollbar<VerticalScrollbar> {
 
         if (theme.texture != null) {
             // draw bg
-            RENDERER.texturedRect(x, y, width, height, 0, 0, 32, 128, 64, 128, theme.texture);
+            RENDERER.texturedRect(x, y, width, height, theme.texture, 0, 0, 32, 128, 64, 128);
             // draw scrollbar
-            RENDERER.texturedRect(x, (int) (y + (getScroll() * height / getScrollPages())), x + width, (int) (y + (getScroll() + 1) * height / getScrollPages()), 32, 0, 32, 128, 64, 128, theme.texture);
+            RENDERER.texturedRect(x, (int) (y + (getScroll() * height / getScrollPages())), x + width, (int) (y + (getScroll() + 1) * height / getScrollPages()),
+                theme.texture,
+                32, 0, 32, 128, 64, 128
+            );
         } else {
             // draw border
             RENDERER.rect(x, y, x + width, y + theme.borderWidth, theme.borderColor);

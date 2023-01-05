@@ -13,7 +13,7 @@ public abstract class ScrollingElementContainer extends PositionedElementContain
 
     public ScrollingElementContainer(int x, int y, int width, int height) {
         super(x, y, width, height);
-        this.scrollbar = addElement(new VerticalScrollbar(x + width - 12, y, 12, height, 1, this::onScrolled));
+        addElement(this.scrollbar = new VerticalScrollbar(x + width - 12, y, 12, height, 1, this::onScrolled));
     }
 
     public void onScrolled(VerticalScrollbar sb) {
@@ -41,6 +41,30 @@ public abstract class ScrollingElementContainer extends PositionedElementContain
         int diff = max - min;
         scrollbar.setScrollPages(diff / (double) height);
         scrollbar.setHidden(scrollbar.getScrollPages() == 1);
+    }
+
+    @Override
+    public void setX(int x) {
+        super.setX(x);
+        if (scrollbar != null) scrollbar.setX(x + width - 12);
+    }
+
+    @Override
+    public void setY(int y) {
+        super.setY(y);
+        if (scrollbar != null) scrollbar.setY(y);
+    }
+
+    @Override
+    public void setWidth(int width) {
+        super.setWidth(width);
+        if (scrollbar != null) scrollbar.setX(x + width - 12);
+    }
+
+    @Override
+    public void setHeight(int height) {
+        super.setHeight(height);
+        if (scrollbar != null) scrollbar.setHeight(height);
     }
 
     @Override
@@ -79,7 +103,7 @@ public abstract class ScrollingElementContainer extends PositionedElementContain
         Iterator<Element> it = elements.descendingIterator();
         while (it.hasNext()) {
             Element e = it.next();
-            if (e instanceof Disableable && !((Disableable) e).isHidden()) {
+            if (e instanceof Renderable && (!(e instanceof Disableable) || !((Disableable) e).isHidden())) {
                 if (isWithinBounds(e.getX(), e.getY()) && isWithinBounds(e.getX() + e.getWidth(), e.getY() + e.getHeight())) {
                     ((Renderable) e).onRender(mouseX, mouseY);
                 }

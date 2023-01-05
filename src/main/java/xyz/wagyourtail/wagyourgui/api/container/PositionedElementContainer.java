@@ -125,7 +125,7 @@ public abstract class PositionedElementContainer extends AbstractElement impleme
         Iterator<Element> it = elements.descendingIterator();
         while (it.hasNext()) {
             Element e = it.next();
-            if (e instanceof Disableable && !((Disableable) e).isHidden()) {
+            if (e instanceof Renderable && (!(e instanceof Disableable) || !((Disableable) e).isHidden())) {
                 ((Renderable) e).onRender(mouseX, mouseY);
             }
         }

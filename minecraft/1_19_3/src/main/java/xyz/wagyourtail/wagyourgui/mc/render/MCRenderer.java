@@ -35,19 +35,19 @@ public class MCRenderer extends GuiComponent implements Renderer<MCTexture<Abstr
     }
 
     @Override
-    public void texturedRect(int x, int y, int width, int height, int u, int v, int textureWidth, int textureHeight, Texture tex) {
+    public void texturedRect(int x, int y, int width, int height, Texture tex, int u, int v, int textureWidth, int textureHeight) {
         RenderSystem.setShaderTexture(0, ((MCTexture) tex).location);
         blit(pose, x, y, u, v, width, height, textureWidth, textureHeight);
     }
 
     @Override
-    public void texturedRect(int x, int y, int width, int height, int u, int v, int uw, int vh, int textureWidth, int textureHeight, Texture tex) {
+    public void texturedRect(int x, int y, int width, int height, Texture tex, int u, int v, int uw, int vh, int textureWidth, int textureHeight) {
         RenderSystem.setShaderTexture(0, ((MCTexture) tex).location);
         blit(pose, x, y, width, height, u, v, uw, vh, textureWidth, textureHeight);
     }
 
     @Override
-    public void texturedRect(int x, int y, int width, int height, int u, int v, int textureWidth, int textureHeight, Texture tex, int color) {
+    public void texturedRect(int x, int y, int width, int height, Texture tex, int u, int v, int textureWidth, int textureHeight, int color) {
         RenderSystem.setShaderTexture(0, ((MCTexture) tex).location);
 
         Matrix4f matrix = pose.last().pose();
@@ -72,7 +72,7 @@ public class MCRenderer extends GuiComponent implements Renderer<MCTexture<Abstr
     }
 
     @Override
-    public void texturedRect(int x, int y, int width, int height, int u, int v, int uw, int vh, int textureWidth, int textureHeight, Texture tex, int color) {
+    public void texturedRect(int x, int y, int width, int height, Texture tex, int u, int v, int uw, int vh, int textureWidth, int textureHeight, int color) {
         RenderSystem.setShaderTexture(0, ((MCTexture) tex).location);
 
         Matrix4f matrix = pose.last().pose();

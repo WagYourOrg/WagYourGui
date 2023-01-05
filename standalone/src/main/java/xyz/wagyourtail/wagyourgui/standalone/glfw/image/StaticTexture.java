@@ -2,10 +2,13 @@ package xyz.wagyourtail.wagyourgui.standalone.glfw.image;
 
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.stb.STBImage;
+import xyz.wagyourtail.wagyourgui.standalone.glfw.ResourceLocation;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.ByteBuffer;
 import java.nio.file.Files;
+import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
 
 public class StaticTexture implements BaseTex {
@@ -16,8 +19,15 @@ public class StaticTexture implements BaseTex {
 
     private int texid = -1;
 
-    public StaticTexture(Path path) throws IOException {
-        ByteBuffer data = ByteBuffer.wrap(Files.readAllBytes(path));
+    public StaticTexture(ResourceLocation path) throws IOException {
+        ByteBuffer data;
+        try (InputStream stream = path.getResource()) {
+            byte[] in = stream.readAllBytes();
+            data = ByteBuffer.allocateDirect(in.length);
+            data.put(in);
+        }
+
+        data.flip();
 
         if (!STBImage.stbi_info_from_memory(data, w, h, comp)) {
             throw new IOException("Failed to load image");

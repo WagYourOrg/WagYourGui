@@ -11,6 +11,7 @@ import xyz.wagyourtail.wagyourgui.standalone.glfw.ResourceLocation;
 import xyz.wagyourtail.wagyourgui.standalone.glfw.image.BaseTex;
 import xyz.wagyourtail.wagyourgui.standalone.glfw.image.DynamicTexture;
 import xyz.wagyourtail.wagyourgui.standalone.glfw.image.NativeImage;
+import xyz.wagyourtail.wagyourgui.standalone.glfw.image.StaticTexture;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -35,48 +36,237 @@ public class SRenderer implements Renderer<STexture<BaseTex>, SMutTexture> {
     }
 
     @Override
-    public void texturedRect(int x, int y, int width, int height, int u, int v, int textureWidth, int textureHeight, Texture tex) {
+    public void texturedRect(int x, int y, int width, int height, Texture tex, int u, int v, int textureWidth, int textureHeight) {
         ((STexture<BaseTex>) tex).getImage().bind();
         GLBuilder.getImmediate().begin(GL11.GL_TRIANGLE_STRIP, GLBuilder.VertexFormat.POS_TEX)
+                .vertex(x, y).uv(u, v, textureWidth, textureHeight).next()
+                .vertex(x + width, y).uv(u + width, v, textureWidth, textureHeight).next()
                 .vertex(x, y + height).uv(u, v + height, textureWidth, textureHeight).next()
                 .vertex(x + width, y + height).uv(u + width, v + height, textureWidth, textureHeight).next()
-                .vertex(x + width, y).uv(u + width, v, textureWidth, textureHeight).next()
-                .vertex(x, y).uv(u, v, textureWidth, textureHeight).next()
                 .end();
     }
 
     @Override
-    public void texturedRect(int x, int y, int width, int height, int u, int v, int uw, int vh, int textureWidth, int textureHeight, Texture tex) {
+    public void texturedRect(int x, int y, int width, int height, Texture tex, int u, int v, int uw, int vh, int textureWidth, int textureHeight) {
         ((STexture<BaseTex>) tex).getImage().bind();
         GLBuilder.getImmediate().begin(GL11.GL_TRIANGLE_STRIP, GLBuilder.VertexFormat.POS_TEX)
+                .vertex(x, y).uv(u, v, textureWidth, textureHeight).next()
+                .vertex(x + width, y).uv(u + uw, v, textureWidth, textureHeight).next()
                 .vertex(x, y + height).uv(u, v + vh, textureWidth, textureHeight).next()
                 .vertex(x + width, y + height).uv(u + uw, v + vh, textureWidth, textureHeight).next()
-                .vertex(x + width, y).uv(u + uw, v, textureWidth, textureHeight).next()
-                .vertex(x, y).uv(u, v, textureWidth, textureHeight).next()
                 .end();
     }
 
     @Override
-    public void texturedRect(int x, int y, int width, int height, int u, int v, int textureWidth, int textureHeight, Texture tex, int color) {
+    public void texturedRect(int x, int y, int width, int height, Texture tex, int u, int v, int textureWidth, int textureHeight, int color) {
         ((STexture<BaseTex>) tex).getImage().bind();
         GLBuilder.getImmediate().begin(GL11.GL_TRIANGLE_STRIP, GLBuilder.VertexFormat.POS_COL_TEX)
+                .vertex(x, y).color(color).uv(u, v, textureWidth, textureHeight).next()
+                .vertex(x + width, y).color(color).uv(u + width, v, textureWidth, textureHeight).next()
                 .vertex(x, y + height).color(color).uv(u, v + height, textureWidth, textureHeight).next()
                 .vertex(x + width, y + height).color(color).uv(u + width, v + height, textureWidth, textureHeight).next()
-                .vertex(x + width, y).color(color).uv(u + width, v, textureWidth, textureHeight).next()
-                .vertex(x, y).color(color).uv(u, v, textureWidth, textureHeight).next()
                 .end();
     }
 
     @Override
-    public void texturedRect(int x, int y, int width, int height, int u, int v, int uw, int vh, int textureWidth, int textureHeight, Texture tex, int color) {
+    public void texturedRect(int x, int y, int width, int height, Texture tex, int u, int v, int uw, int vh, int textureWidth, int textureHeight, int color) {
         ((STexture<BaseTex>) tex).getImage().bind();
         GLBuilder.getImmediate().begin(GL11.GL_TRIANGLE_STRIP, GLBuilder.VertexFormat.POS_COL_TEX)
+                .vertex(x, y).color(color).uv(u, v, textureWidth, textureHeight).next()
+                .vertex(x + width, y).color(color).uv(u + uw, v, textureWidth, textureHeight).next()
                 .vertex(x, y + height).color(color).uv(u, v + vh, textureWidth, textureHeight).next()
                 .vertex(x + width, y + height).color(color).uv(u + uw, v + vh, textureWidth, textureHeight).next()
-                .vertex(x + width, y).color(color).uv(u + uw, v, textureWidth, textureHeight).next()
-                .vertex(x, y).color(color).uv(u, v, textureWidth, textureHeight).next()
                 .end();
     }
+
+    @Override
+    public void rotatedRect(int topLeftX, int topLeftY, int topRightX, int topRightY, int bottomLeftX, int bottomLeftY, int color) {
+        // calculate 4th point
+
+        // vec from top left to bottom left
+        int vec1x = bottomLeftX - topLeftX;
+        int vec1y = bottomLeftY - topLeftY;
+        int bottomRightX = topRightX + vec1x;
+        int bottomRightY = topRightY + vec1y;
+
+
+        GLBuilder.getImmediate().begin(GL11.GL_TRIANGLE_STRIP)
+                .vertex(topLeftX, topLeftY).color(color).next()
+                .vertex(topRightX, topRightY).color(color).next()
+                .vertex(bottomLeftX, bottomLeftY).color(color).next()
+                .vertex(bottomRightX, bottomRightY).color(color).next()
+                .end();
+    }
+
+    @Override
+    public void texturedRotatedRect(int topLeftX, int topLeftY, int topRightX, int topRightY, int bottomLeftX, int bottomLeftY, Texture tex, int u, int v, int textureWidth, int textureHeight) {
+        // calculate 4th point
+
+        // vec from top left to bottom left
+        int vec1x = bottomLeftX - topLeftX;
+        int vec1y = bottomLeftY - topLeftY;
+        int bottomRightX = topRightX + vec1x;
+        int bottomRightY = topRightY + vec1y;
+
+        ((STexture<BaseTex>) tex).getImage().bind();
+        GLBuilder.getImmediate().begin(GL11.GL_TRIANGLE_STRIP, GLBuilder.VertexFormat.POS_TEX)
+            .vertex(topLeftX, topLeftY).uv(u, v, textureWidth, textureHeight).next()
+            .vertex(topRightX, topRightY).uv(u + topRightX - topLeftX, v, textureWidth, textureHeight).next()
+            .vertex(bottomLeftX, bottomLeftY).uv(u, v + bottomLeftY - topLeftY, textureWidth, textureHeight).next()
+            .vertex(bottomRightX, bottomRightY).uv(
+                u + topRightX - topLeftX,
+                v + bottomLeftY - topLeftY,
+                textureWidth,
+                textureHeight
+            ).next()
+            .end();
+    }
+
+    @Override
+    public void texturedRotatedRect(int topLeftX, int topLeftY, int topRightX, int topRightY, int bottomLeftX, int bottomLeftY, Texture tex, int u, int v, int uw, int vh, int textureWidth, int textureHeight) {
+        // calculate 4th point
+
+        // vec from top left to bottom left
+        int vec1x = bottomLeftX - topLeftX;
+        int vec1y = bottomLeftY - topLeftY;
+        int bottomRightX = topRightX + vec1x;
+        int bottomRightY = topRightY + vec1y;
+
+        ((STexture<BaseTex>) tex).getImage().bind();
+        GLBuilder.getImmediate().begin(GL11.GL_TRIANGLE_STRIP, GLBuilder.VertexFormat.POS_TEX)
+            .vertex(topLeftX, topLeftY).uv(u, v, textureWidth, textureHeight).next()
+            .vertex(topRightX, topRightY).uv(u + uw, v, textureWidth, textureHeight).next()
+            .vertex(bottomLeftX, bottomLeftY).uv(u, v + vh, textureWidth, textureHeight).next()
+            .vertex(bottomRightX, bottomRightY).uv(
+                u + uw,
+                v + vh,
+                textureWidth,
+                textureHeight
+            ).next()
+            .end();
+    }
+
+    @Override
+    public void texturedRotatedRect(int topLeftX, int topLeftY, int topRightX, int topRightY, int bottomLeftX, int bottomLeftY, Texture tex, int u, int v, int textureWidth, int textureHeight, int color) {
+        // calculate 4th point
+
+        // vec from top left to bottom left
+        int vec1x = bottomLeftX - topLeftX;
+        int vec1y = bottomLeftY - topLeftY;
+        int bottomRightX = topRightX + vec1x;
+        int bottomRightY = topRightY + vec1y;
+
+        ((STexture<BaseTex>) tex).getImage().bind();
+        GLBuilder.getImmediate().begin(GL11.GL_TRIANGLE_STRIP, GLBuilder.VertexFormat.POS_COL_TEX)
+            .vertex(topLeftX, topLeftY).color(color).uv(u, v, textureWidth, textureHeight).next()
+            .vertex(topRightX, topRightY).color(color).uv(u + topRightX - topLeftX, v, textureWidth, textureHeight).next()
+            .vertex(bottomLeftX, bottomLeftY).color(color).uv(u, v + bottomLeftY - topLeftY, textureWidth, textureHeight).next()
+            .vertex(bottomRightX, bottomRightY).color(color).uv(
+                u + topRightX - topLeftX,
+                v + bottomLeftY - topLeftY,
+                textureWidth,
+                textureHeight
+            )
+            .next()
+            .end();
+    }
+
+    @Override
+    public void texturedRotatedRect(int topLeftX, int topLeftY, int topRightX, int topRightY, int bottomLeftX, int bottomLeftY, Texture tex, int u, int v, int uw, int vh, int textureWidth, int textureHeight, int color) {
+        // calculate 4th point
+
+        // vec from top left to bottom left
+        int vec1x = bottomLeftX - topLeftX;
+        int vec1y = bottomLeftY - topLeftY;
+        int bottomRightX = topRightX + vec1x;
+        int bottomRightY = topRightY + vec1y;
+
+        ((STexture<BaseTex>) tex).getImage().bind();
+        GLBuilder.getImmediate().begin(GL11.GL_TRIANGLE_STRIP, GLBuilder.VertexFormat.POS_COL_TEX)
+            .vertex(topLeftX, topLeftY).color(color).uv(u, v, textureWidth, textureHeight).next()
+            .vertex(topRightX, topRightY).color(color).uv(u + uw, v, textureWidth, textureHeight).next()
+            .vertex(bottomLeftX, bottomLeftY).color(color).uv(u, v + vh, textureWidth, textureHeight).next()
+            .vertex(bottomRightX, bottomRightY).color(color).uv(
+                u + uw,
+                v + vh,
+                textureWidth,
+                textureHeight
+            ).next()
+            .end();
+    }
+
+    @Override
+    public void texturedRotatedRect(int topLeftX, int topLeftY, int topRightX, int topRightY, int bottomLeftX, int bottomLeftY, Texture tex, int topLeftU, int topLeftV, int topRightU, int topRightV, int bottomLeftU, int bottomLeftV, int textureWidth, int textureHeight) {
+        // calculate 4th point
+
+        // vec from top left to bottom left
+        int vec1x = bottomLeftX - topLeftX;
+        int vec1y = bottomLeftY - topLeftY;
+        int bottomRightX = topRightX + vec1x;
+        int bottomRightY = topRightY + vec1y;
+
+        int vec1u = bottomLeftU - topLeftU;
+        int vec1v = bottomLeftV - topLeftV;
+        int bottomRightU = topRightU + vec1u;
+        int bottomRightV = topRightV + vec1v;
+
+        ((STexture<BaseTex>) tex).getImage().bind();
+        GLBuilder.getImmediate().begin(GL11.GL_TRIANGLE_STRIP, GLBuilder.VertexFormat.POS_TEX)
+            .vertex(topLeftX, topLeftY).uv(topLeftU, topLeftV, textureWidth, textureHeight).next()
+            .vertex(topRightX, topRightY).uv(topRightU, topRightV, textureWidth, textureHeight).next()
+            .vertex(bottomLeftX, bottomLeftY).uv(bottomLeftU, bottomLeftV, textureWidth, textureHeight).next()
+            .vertex(bottomRightX, bottomRightY).uv(bottomRightU, bottomRightV, textureWidth, textureHeight).next()
+            .end();
+    }
+
+    @Override
+    public void texturedRotatedRect(int topLeftX, int topLeftY, int topRightX, int topRightY, int bottomLeftX, int bottomLeftY, Texture tex, int topLeftU, int topLeftV, int topRightU, int topRightV, int bottomLeftU, int bottomLeftV, int textureWidth, int textureHeight, int color) {
+        // calculate 4th point
+
+        // vec from top left to bottom left
+        int vec1x = bottomLeftX - topLeftX;
+        int vec1y = bottomLeftY - topLeftY;
+        int bottomRightX = topRightX + vec1x;
+        int bottomRightY = topRightY + vec1y;
+
+        int vec1u = bottomLeftU - topLeftU;
+        int vec1v = bottomLeftV - topLeftV;
+        int bottomRightU = topRightU + vec1u;
+        int bottomRightV = topRightV + vec1v;
+
+        ((STexture<BaseTex>) tex).getImage().bind();
+        GLBuilder.getImmediate().begin(GL11.GL_TRIANGLE_STRIP, GLBuilder.VertexFormat.POS_COL_TEX)
+            .vertex(topLeftX, topLeftY).color(color).uv(topLeftU, topLeftV, textureWidth, textureHeight).next()
+            .vertex(topRightX, topRightY).color(color).uv(topRightU, topRightV, textureWidth, textureHeight).next()
+            .vertex(bottomLeftX, bottomLeftY).color(color).uv(bottomLeftU, bottomLeftV, textureWidth, textureHeight)
+            .next()
+            .vertex(bottomRightX, bottomRightY)
+            .color(color)
+            .uv(bottomRightU, bottomRightV, textureWidth, textureHeight)
+            .next()
+            .end();
+    }
+
+    @Override
+    public void rotatedTextureRect(int x, int y, int width, int height, Texture tex, int topLeftU, int topLeftV, int topRightU, int topRightV, int bottomLeftU, int bottomLeftV, int textureWidth, int textureHeight, int color) {
+        // calculate 4th point
+
+        // vec from top left to bottom left
+        int vec1u = bottomLeftU - topLeftU;
+        int vec1v = bottomLeftV - topLeftV;
+        int bottomRightU = topRightU + vec1u;
+        int bottomRightV = topRightV + vec1v;
+
+        ((STexture<BaseTex>) tex).getImage().bind();
+        GLBuilder.getImmediate().begin(GL11.GL_TRIANGLE_STRIP, GLBuilder.VertexFormat.POS_COL_TEX)
+            .vertex(x, y).color(color).uv(topLeftU, topLeftV, textureWidth, textureHeight).next()
+            .vertex(x + width, y).color(color).uv(topRightU, topRightV, textureWidth, textureHeight).next()
+            .vertex(x, y + height).color(color).uv(bottomLeftU, bottomLeftV, textureWidth, textureHeight).next()
+            .vertex(x + width, y + height).color(color).uv(bottomRightU, bottomRightV, textureWidth, textureHeight).next()
+            .end();
+
+    }
+
 
     @Override
     public void string(String text, int x, int y, int color) {
@@ -335,7 +525,13 @@ public class SRenderer implements Renderer<STexture<BaseTex>, SMutTexture> {
 
     @Override
     public STexture<BaseTex> getTexture(String identifier) {
-        BaseTex tex = session.textures.get(ResourceLocation.of(identifier));
+        BaseTex tex = session.textures.computeIfAbsent(ResourceLocation.of(identifier), loc -> {
+            try {
+                return new StaticTexture(loc);
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        });
         return new STexture<>(tex, identifier);
     }
 

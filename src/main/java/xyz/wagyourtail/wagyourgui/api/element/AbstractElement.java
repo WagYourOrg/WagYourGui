@@ -8,10 +8,7 @@ public abstract class AbstractElement implements Element, Interactable, Renderab
     protected int height;
 
     public AbstractElement(int x, int y, int width, int height) {
-        this.x = x;
-        this.y = y;
-        this.width = width;
-        this.height = height;
+        setBounds(x, y, width, height);
     }
 
     @Override
@@ -56,22 +53,20 @@ public abstract class AbstractElement implements Element, Interactable, Renderab
 
     @Override
     public void setPos(int x, int y) {
-        this.x = x;
-        this.y = y;
+        setX(x);
+        setY(y);
     }
 
     @Override
     public void setSize(int width, int height) {
-        this.width = width;
-        this.height = height;
+        setWidth(width);
+        setHeight(height);
     }
 
     @Override
     public void setBounds(int x, int y, int width, int height) {
-        this.x = x;
-        this.y = y;
-        this.width = width;
-        this.height = height;
+        setPos(x, y);
+        setSize(width, height);
     }
 
     @Override

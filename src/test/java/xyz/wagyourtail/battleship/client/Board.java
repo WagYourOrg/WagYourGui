@@ -1,9 +1,6 @@
 package xyz.wagyourtail.battleship.client;
 
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class Board {
@@ -35,7 +32,7 @@ public class Board {
 
     public boolean placeShip(Ship ship, int x, int y, boolean horizontal) {
         if (frozen) throw new IllegalStateException("Cannot place ships after game start.");
-        if (Arrays.stream(ships).anyMatch(e -> ship.equals(e.getShip())))
+        if (Arrays.stream(ships).filter(Objects::nonNull).anyMatch(e -> ship.equals(e.getShip())))
             throw new IllegalArgumentException("Ship already placed.");
         if (x < 0 || x > 9 || y < 0 || y > 9) throw new IllegalArgumentException("Invalid coordinates.");
         if (horizontal) {
@@ -67,6 +64,24 @@ public class Board {
 
     public boolean hasAttacked(int x, int y) {
         return attackBoard[x][y] != 0;
+    }
+
+    public void forAttackBoard(HitConsumer attacks) {
+        for (int x = 0; x < 10; x++) {
+            for (int y = 0; y < 10; y++) {
+                if ((attackBoard[x][y] & 1) == 1)
+                    attacks.accept(x, y, (attackBoard[x][y] & 2) == 2);
+            }
+        }
+    }
+
+    public void forBoard(HitConsumer attacks) {
+        for (int x = 0; x < 10; x++) {
+            for (int y = 0; y < 10; y++) {
+                if ((board[y][x] & 1) == 1)
+                    attacks.accept(x, y, (board[y][x] & 2) == 2);
+            }
+        }
     }
 
     public int undoPlace() {
@@ -139,7 +154,11 @@ public class Board {
     }
 
     public Set<Ship> getPlacedShips() {
-        return Arrays.stream(ships).map(ShipLocation::getShip).collect(Collectors.toSet());
+        return Arrays.stream(ships).filter(Objects::nonNull).map(ShipLocation::getShip).collect(Collectors.toSet());
+    }
+
+    public Set<ShipLocation> getShipLocations() {
+        return Arrays.stream(ships).filter(Objects::nonNull).collect(Collectors.toSet());
     }
 
     public enum Ship {
@@ -184,9 +203,9 @@ public class Board {
 
     public static class ShipLocation {
         private final Ship ship;
-        private final int x;
-        private final int y;
-        private final boolean horizontal;
+        public final int x;
+        public final int y;
+        public final boolean horizontal;
 
         public ShipLocation(Ship ship, int x, int y, boolean horizontal) {
             this.ship = ship;
@@ -198,5 +217,10 @@ public class Board {
         public Ship getShip() {
             return ship;
         }
+    }
+
+    @FunctionalInterface
+    public interface HitConsumer {
+        void accept(int x, int y, boolean hit);
     }
 }

@@ -29,6 +29,20 @@ public class StringSelector extends DropDownElementContainer {
         updateOptions();
     }
 
+    public void setOptions(String current, List<String> options) {
+        this.current = current;
+        dropDown.setText(current);
+        this.options = (List) options;
+        updateOptions();
+    }
+
+    public void setOptions(ColoredString current, List<ColoredString> options) {
+        this.current = current;
+        dropDown.setText(current);
+        this.options = (List) options;
+        updateOptions();
+    }
+
     protected void updateOptions() {
         clearScrollContainer();
         int y = this.y + dropDown.getHeight();

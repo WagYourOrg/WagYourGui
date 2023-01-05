@@ -26,7 +26,7 @@ public abstract class Overlay implements OverlayElement, Renderable, Themeable<T
         Theme.OverlayTheme theme = getTheme();
 
         if (theme.bgTexture != null) {
-            RENDERER.texturedRect(x, y, width, height, 0, 0, 16, 16, theme.bgTexture);
+            RENDERER.texturedRect(x, y, width, height, theme.bgTexture, 0, 0, 16, 16);
         } else {
             RENDERER.rect(x, y, width, theme.borderWidth, theme.borderColor);
             RENDERER.rect(x, y + height - theme.borderWidth, width, theme.borderWidth, theme.borderColor);
