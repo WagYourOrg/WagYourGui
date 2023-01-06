@@ -97,7 +97,7 @@ public abstract class ScreenWithOverlays extends Screen {
     @Override
     public boolean onKeyPressed(int keyCode, int scanCode, int modifiers) {
         if (overlay != null) {
-            if (Key.getKey(keyCode) == Key.ESCAPE) {
+            if (Key.getKey(keyCode) == Key.Keyboard.ESCAPE) {
                 closeOverlay();
                 return true;
             }

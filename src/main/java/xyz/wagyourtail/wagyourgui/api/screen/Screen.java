@@ -111,7 +111,7 @@ public abstract class Screen extends LayeredElementContainer implements Interact
     @Override
     public boolean onKeyPressed(int keyCode, int scanCode, int modifiers) {
         if (super.onKeyPressed(keyCode, scanCode, modifiers)) return true;
-        if (Key.getKey(keyCode) == Key.ESCAPE) {
+        if (Key.getKey(keyCode) == Key.Keyboard.ESCAPE) {
             close();
             return true;
         }

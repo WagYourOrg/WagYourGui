@@ -140,7 +140,7 @@ public abstract class Overlay implements OverlayElement, Renderable, Themeable<T
     @Override
     public boolean onKeyPressed(int keyCode, int scanCode, int modifiers) {
         if (overlay != null) return overlay.onKeyPressed(keyCode, scanCode, modifiers);
-        if (Key.getKey(keyCode).equals(Key.ESCAPE)) {
+        if (Key.getKey(keyCode).equals(Key.Keyboard.ESCAPE)) {
             onClose();
             return true;
         }
