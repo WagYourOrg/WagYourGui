@@ -6,7 +6,7 @@ import java.util.Deque;
 import java.util.Iterator;
 import java.util.LinkedList;
 
-public abstract class PositionedElementContainer extends AbstractElement implements ElementContainer {
+public abstract class PositionedElementContainer extends AbstractElement implements ElementContainer, Ticking {
     protected final Deque<Element> elements = new LinkedList<>();
     Interactable focusedElement = null;
 
@@ -118,6 +118,15 @@ public abstract class PositionedElementContainer extends AbstractElement impleme
             return focusedElement.onCharTyped(character, mods);
         }
         return false;
+    }
+
+    @Override
+    public void onTick() {
+        for (Element e : elements) {
+            if (e instanceof Ticking) {
+                ((Ticking) e).onTick();
+            }
+        }
     }
 
     @Override

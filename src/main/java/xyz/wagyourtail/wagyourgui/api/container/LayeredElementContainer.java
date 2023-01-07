@@ -1,16 +1,13 @@
 package xyz.wagyourtail.wagyourgui.api.container;
 
-import xyz.wagyourtail.wagyourgui.api.element.Disableable;
-import xyz.wagyourtail.wagyourgui.api.element.Element;
-import xyz.wagyourtail.wagyourgui.api.element.Interactable;
-import xyz.wagyourtail.wagyourgui.api.element.Renderable;
+import xyz.wagyourtail.wagyourgui.api.element.*;
 
 import java.util.Arrays;
 import java.util.Deque;
 import java.util.Iterator;
 import java.util.LinkedList;
 
-public abstract class LayeredElementContainer implements ElementContainer, Interactable, Renderable {
+public abstract class LayeredElementContainer implements ElementContainer, Interactable, Renderable, Ticking {
     protected ElementLayer[] elements = new ElementLayer[1];
     protected Interactable focusedElement = null;
     protected int currentLayer = 0;
@@ -164,6 +161,20 @@ public abstract class LayeredElementContainer implements ElementContainer, Inter
             return focusedElement.onKeyReleased(keyCode, scanCode, modifiers);
         }
         return false;
+    }
+
+    @Override
+    public void onTick() {
+        for (ElementLayer l : elements) {
+            if (l == null) continue;
+            if (l.isInteractable()) {
+                for (Element e : l.getElements()) {
+                    if (e instanceof Ticking) {
+                        ((Ticking) e).onTick();
+                    }
+                }
+            }
+        }
     }
 
     @Override

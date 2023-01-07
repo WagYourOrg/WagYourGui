@@ -1,0 +1,18 @@
+{
+  "schemaVersion": 1,
+  "id": "wagyourgui",
+  "version": "1.0.0",
+  "name": "WagYourGui",
+  "description": "WagYourGui is a universal GUI library",
+  "authors": ["Wagyourtail"],
+  "contact": {
+    "homepage": "https://wagyourtail.xyz",
+    "sources": "https://github.com/wagyourorg/WagYourGui"
+  },
+  "license": "MPL-2.0",
+  "icon": "assets/wagyourgui/icon.png",
+  "environment": "*",
+  "depends": {
+    "minecraft": "1.19.3"
+  }
+}

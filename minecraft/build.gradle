@@ -91,6 +91,8 @@ subprojects {
         implementation rootProject.sourceSets.main.output
         if (!common) {
             include project(":")
+            implementation project(path.substring(0, path.lastIndexOf(":")))
+            // TODO: shadow this
         }
 
         if (official_mappings) {

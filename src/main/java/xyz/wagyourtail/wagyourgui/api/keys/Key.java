@@ -291,11 +291,4 @@ public interface Key {
     static Key getKey(String name) {
         return byName.get(name.toLowerCase());
     }
-
-    static void main(String[] args) {
-        for (Map.Entry<String, Key> entry : byName.entrySet()) {
-            System.out.println(entry.getKey() + " = " + entry.getValue().getKeyCode());
-        }
-        System.out.println(Keyboard.getKey("LAST2"));
-    }
 }

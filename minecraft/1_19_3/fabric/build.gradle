@@ -5,6 +5,27 @@ repositories {
     }
 }
 
+sourceSets {
+    testClient {
+        java {
+            resources.srcDirs(resources.getSrcDirs(), rootProject.sourceSets.test.resources.srcDirs)
+        }
+    }
+}
+
+minecraft {
+    clientSourceSets = [sourceSets.testClient]
+}
+
 dependencies {
     mappings "net.fabricmc:intermediary:${minecraft_version}:v2"
+
+    testClientImplementation rootProject.sourceSets.test.output
+
+    modImplementationClient fabricApi.module("fabric-api-base", "0.72.0+1.19.3")
+    modImplementationClient fabricApi.module("fabric-resource-loader-v0", "0.72.0+1.19.3")
+}
+
+processTestClientResources {
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
 }

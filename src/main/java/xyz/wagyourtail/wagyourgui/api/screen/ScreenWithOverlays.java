@@ -1,6 +1,7 @@
 package xyz.wagyourtail.wagyourgui.api.screen;
 
 import xyz.wagyourtail.wagyourgui.api.element.Renderable;
+import xyz.wagyourtail.wagyourgui.api.element.Ticking;
 import xyz.wagyourtail.wagyourgui.api.keys.Key;
 import xyz.wagyourtail.wagyourgui.api.overlay.OverlayElement;
 
@@ -112,5 +113,13 @@ public abstract class ScreenWithOverlays extends Screen {
             return overlay.onKeyReleased(keyCode, scanCode, modifiers);
         }
         return super.onKeyReleased(keyCode, scanCode, modifiers);
+    }
+
+    @Override
+    public void onTick() {
+        super.onTick();
+        if (overlay != null && overlay instanceof Ticking) {
+            ((Ticking) overlay).onTick();
+        }
     }
 }

@@ -11,7 +11,7 @@ import xyz.wagyourtail.wagyourgui.api.theme.Theme;
 
 import java.util.Arrays;
 
-public abstract class Screen extends LayeredElementContainer implements Interactable, Ticking, Renderable, Themeable<Theme.ScreenTheme> {
+public abstract class Screen extends LayeredElementContainer implements Interactable, Renderable, Themeable<Theme.ScreenTheme> {
     protected int width;
     protected int height;
     private Object parent;

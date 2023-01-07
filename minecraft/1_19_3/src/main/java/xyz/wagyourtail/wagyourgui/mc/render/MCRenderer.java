@@ -16,6 +16,9 @@ import xyz.wagyourtail.wagyourgui.api.render.Renderer;
 import xyz.wagyourtail.wagyourgui.api.render.Texture;
 import xyz.wagyourtail.wagyourgui.api.screen.Screen;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class MCRenderer extends GuiComponent implements Renderer<MCTexture<AbstractTexture>, MCMutableTexture> {
     public static MCRenderer INSTANCE;
     Minecraft mc = Minecraft.getInstance();
@@ -61,13 +64,13 @@ public class MCRenderer extends GuiComponent implements Renderer<MCTexture<Abstr
         float u2 = (float) (u + width) / (float) textureWidth;
         float v2 = (float) (v + height) / (float) textureHeight;
 
-        RenderSystem.setShader(GameRenderer::getPositionTexShader);
+        RenderSystem.setShader(GameRenderer::getPositionColorTexShader);
         BufferBuilder $$10 = Tesselator.getInstance().getBuilder();
         $$10.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_COLOR_TEX);
-        $$10.vertex(matrix, (float) x1, (float) y2, 0).color(color).uv(u1, v2).endVertex();
-        $$10.vertex(matrix, (float) x2, (float) y2, 0).color(color).uv(u2, v2).endVertex();
-        $$10.vertex(matrix, (float) x2, (float) y1, 0).color(color).uv(u2, v1).endVertex();
-        $$10.vertex(matrix, (float) x1, (float) y1, 0).color(color).uv(u1, v1).endVertex();
+        $$10.vertex(matrix, x1, y2, 0.0F).color(color).uv(u1, v2).endVertex();
+        $$10.vertex(matrix, x2, y2, 0.0F).color(color).uv(u2, v2).endVertex();
+        $$10.vertex(matrix, x2, y1, 0.0F).color(color).uv(u2, v1).endVertex();
+        $$10.vertex(matrix, x1, y1, 0.0F).color(color).uv(u1, v1).endVertex();
         BufferUploader.drawWithShader($$10.end());
     }
 
@@ -87,13 +90,255 @@ public class MCRenderer extends GuiComponent implements Renderer<MCTexture<Abstr
         float u2 = (float) (u + uw) / (float) textureWidth;
         float v2 = (float) (v + vh) / (float) textureHeight;
 
-        RenderSystem.setShader(GameRenderer::getPositionTexShader);
+        RenderSystem.setShader(GameRenderer::getPositionColorTexShader);
         BufferBuilder $$10 = Tesselator.getInstance().getBuilder();
         $$10.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_COLOR_TEX);
-        $$10.vertex(matrix, (float) x1, (float) y2, 0).color(color).uv(u1, v2).endVertex();
-        $$10.vertex(matrix, (float) x2, (float) y2, 0).color(color).uv(u2, v2).endVertex();
-        $$10.vertex(matrix, (float) x2, (float) y1, 0).color(color).uv(u2, v1).endVertex();
-        $$10.vertex(matrix, (float) x1, (float) y1, 0).color(color).uv(u1, v1).endVertex();
+        $$10.vertex(matrix, x1, y2, 0.0F).color(color).uv(u1, v2).endVertex();
+        $$10.vertex(matrix, x2, y2, 0.0F).color(color).uv(u2, v2).endVertex();
+        $$10.vertex(matrix, x2, y1, 0.0F).color(color).uv(u2, v1).endVertex();
+        $$10.vertex(matrix, x1, y1, 0.0F).color(color).uv(u1, v1).endVertex();
+        BufferUploader.drawWithShader($$10.end());
+    }
+
+    @Override
+    public void rotatedRect(int topLeftX, int topLeftY, int topRightX, int topRightY, int bottomLeftX, int bottomLeftY, int color) {
+
+        // calculate 4th point
+
+        Matrix4f matrix = pose.last().pose();
+
+        // vec from top left to bottom left
+        int vec1x = bottomLeftX - topLeftX;
+        int vec1y = bottomLeftY - topLeftY;
+        int bottomRightX = topRightX + vec1x;
+        int bottomRightY = topRightY + vec1y;
+
+        RenderSystem.setShader(GameRenderer::getPositionColorShader);
+        BufferBuilder $$10 = Tesselator.getInstance().getBuilder();
+        $$10.begin(VertexFormat.Mode.TRIANGLE_STRIP, DefaultVertexFormat.POSITION_COLOR);
+        $$10.vertex(matrix, topLeftX, topLeftY, 0.0F).color(color).endVertex();
+        $$10.vertex(matrix, bottomLeftX, bottomLeftY, 0.0F).color(color).endVertex();
+        $$10.vertex(matrix, topRightX, topRightY, 0.0F).color(color).endVertex();
+        $$10.vertex(matrix, bottomRightX, bottomRightY, 0.0F).color(color).endVertex();
+        BufferUploader.drawWithShader($$10.end());
+    }
+
+    @Override
+    public void texturedRotatedRect(int topLeftX, int topLeftY, int topRightX, int topRightY, int bottomLeftX, int bottomLeftY, Texture tex, int u, int v, int textureWidth, int textureHeight) {
+        RenderSystem.setShaderTexture(0, ((MCTexture) tex).location);
+
+        Matrix4f matrix = pose.last().pose();
+
+        // calculate 4th point
+
+        // vec from top left to bottom left
+        int vec1x = bottomLeftX - topLeftX;
+        int vec1y = bottomLeftY - topLeftY;
+        int bottomRightX = topRightX + vec1x;
+        int bottomRightY = topRightY + vec1y;
+
+        float u1 = (float) u / (float) textureWidth;
+        float v1 = (float) v / (float) textureHeight;
+        float u2 = (float) (u + topRightX - topLeftX) / (float) textureWidth;
+        float v2 = (float) (v + bottomLeftY - topLeftY) / (float) textureHeight;
+
+        RenderSystem.setShader(GameRenderer::getPositionTexShader);
+        BufferBuilder $$10 = Tesselator.getInstance().getBuilder();
+        $$10.begin(VertexFormat.Mode.TRIANGLE_STRIP, DefaultVertexFormat.POSITION_TEX);
+        $$10.vertex(matrix, topLeftX, topLeftY, 0.0F).uv(u1, v1).endVertex();
+        $$10.vertex(matrix, bottomLeftX, bottomLeftY, 0.0F).uv(u1, v2).endVertex();
+        $$10.vertex(matrix, topRightX, topRightY, 0.0F).uv(u2, v1).endVertex();
+        $$10.vertex(matrix, bottomRightX, bottomRightY, 0.0F).uv(u2, v2).endVertex();
+        BufferUploader.drawWithShader($$10.end());
+    }
+
+    @Override
+    public void texturedRotatedRect(int topLeftX, int topLeftY, int topRightX, int topRightY, int bottomLeftX, int bottomLeftY, Texture tex, int u, int v, int uw, int vh, int textureWidth, int textureHeight) {
+        RenderSystem.setShaderTexture(0, ((MCTexture) tex).location);
+
+        Matrix4f matrix = pose.last().pose();
+
+        // calculate 4th point
+
+        // vec from top left to bottom left
+        int vec1x = bottomLeftX - topLeftX;
+        int vec1y = bottomLeftY - topLeftY;
+        int bottomRightX = topRightX + vec1x;
+        int bottomRightY = topRightY + vec1y;
+
+        float u1 = (float) u / (float) textureWidth;
+        float v1 = (float) v / (float) textureHeight;
+        float u2 = (float) (u + uw) / (float) textureWidth;
+        float v2 = (float) (v + vh) / (float) textureHeight;
+
+        RenderSystem.setShader(GameRenderer::getPositionTexShader);
+        BufferBuilder $$10 = Tesselator.getInstance().getBuilder();
+        $$10.begin(VertexFormat.Mode.TRIANGLE_STRIP, DefaultVertexFormat.POSITION_TEX);
+        $$10.vertex(matrix, topLeftX, topLeftY, 0.0F).uv(u1, v1).endVertex();
+        $$10.vertex(matrix, bottomLeftX, bottomLeftY, 0.0F).uv(u1, v2).endVertex();
+        $$10.vertex(matrix, topRightX, topRightY, 0.0F).uv(u2, v1).endVertex();
+        $$10.vertex(matrix, bottomRightX, bottomRightY, 0.0F).uv(u2, v2).endVertex();
+        BufferUploader.drawWithShader($$10.end());
+    }
+
+    @Override
+    public void texturedRotatedRect(int topLeftX, int topLeftY, int topRightX, int topRightY, int bottomLeftX, int bottomLeftY, Texture tex, int u, int v, int textureWidth, int textureHeight, int color) {
+        RenderSystem.setShaderTexture(0, ((MCTexture) tex).location);
+
+        Matrix4f matrix = pose.last().pose();
+
+        // calculate 4th point
+
+        // vec from top left to bottom left
+        int vec1x = bottomLeftX - topLeftX;
+        int vec1y = bottomLeftY - topLeftY;
+        int bottomRightX = topRightX + vec1x;
+        int bottomRightY = topRightY + vec1y;
+
+        float u1 = (float) u / (float) textureWidth;
+        float v1 = (float) v / (float) textureHeight;
+        float u2 = (float) (u + topRightX - topLeftX) / (float) textureWidth;
+        float v2 = (float) (v + bottomLeftY - topLeftY) / (float) textureHeight;
+
+        RenderSystem.setShader(GameRenderer::getPositionColorTexShader);
+        BufferBuilder $$10 = Tesselator.getInstance().getBuilder();
+        $$10.begin(VertexFormat.Mode.TRIANGLE_STRIP, DefaultVertexFormat.POSITION_COLOR_TEX);
+        $$10.vertex(matrix, topLeftX, topLeftY, 0.0F).color(color).uv(u1, v1).endVertex();
+        $$10.vertex(matrix, bottomLeftX, bottomLeftY, 0.0F).color(color).uv(u1, v2).endVertex();
+        $$10.vertex(matrix, topRightX, topRightY, 0.0F).color(color).uv(u2, v1).endVertex();
+        $$10.vertex(matrix, bottomRightX, bottomRightY, 0.0F).color(color).uv(u2, v2).endVertex();
+        BufferUploader.drawWithShader($$10.end());
+    }
+
+    @Override
+    public void texturedRotatedRect(int topLeftX, int topLeftY, int topRightX, int topRightY, int bottomLeftX, int bottomLeftY, Texture tex, int u, int v, int uw, int vh, int textureWidth, int textureHeight, int color) {
+        RenderSystem.setShaderTexture(0, ((MCTexture) tex).location);
+
+        Matrix4f matrix = pose.last().pose();
+
+        // calculate 4th point
+
+        // vec from top left to bottom left
+        int vec1x = bottomLeftX - topLeftX;
+        int vec1y = bottomLeftY - topLeftY;
+        int bottomRightX = topRightX + vec1x;
+        int bottomRightY = topRightY + vec1y;
+
+        float u1 = (float) u / (float) textureWidth;
+        float v1 = (float) v / (float) textureHeight;
+        float u2 = (float) (u + uw) / (float) textureWidth;
+        float v2 = (float) (v + vh) / (float) textureHeight;
+
+        RenderSystem.setShader(GameRenderer::getPositionTexShader);
+        BufferBuilder $$10 = Tesselator.getInstance().getBuilder();
+        $$10.begin(VertexFormat.Mode.TRIANGLE_STRIP, DefaultVertexFormat.POSITION_COLOR_TEX);
+        $$10.vertex(matrix, topLeftX, topLeftY, 0.0F).color(color).uv(u1, v1).endVertex();
+        $$10.vertex(matrix, bottomLeftX, bottomLeftY, 0.0F).color(color).uv(u1, v2).endVertex();
+        $$10.vertex(matrix, topRightX, topRightY, 0.0F).color(color).uv(u2, v1).endVertex();
+        $$10.vertex(matrix, bottomRightX, bottomRightY, 0.0F).color(color).uv(u2, v2).endVertex();
+        BufferUploader.drawWithShader($$10.end());
+    }
+
+    @Override
+    public void texturedRotatedRect(int topLeftX, int topLeftY, int topRightX, int topRightY, int bottomLeftX, int bottomLeftY, Texture tex, int topLeftU, int topLeftV, int topRightU, int topRightV, int bottomLeftU, int bottomLeftV, int textureWidth, int textureHeight) {
+        RenderSystem.setShaderTexture(0, ((MCTexture) tex).location);
+
+        Matrix4f matrix = pose.last().pose();
+
+        // calculate 4th point
+
+        // vec from top left to bottom left
+        int vec1x = bottomLeftX - topLeftX;
+        int vec1y = bottomLeftY - topLeftY;
+        int bottomRightX = topRightX + vec1x;
+        int bottomRightY = topRightY + vec1y;
+        int vec1u = bottomLeftU - topLeftU;
+        int vec1v = bottomLeftV - topLeftV;
+        int bottomRightU = topRightU + vec1u;
+        int bottomRightV = topRightV + vec1v;
+
+        float u1 = (float) topLeftU / (float) textureWidth;
+        float v1 = (float) topLeftV / (float) textureHeight;
+        float u2 = (float) topRightU / (float) textureWidth;
+        float v2 = (float) topRightV / (float) textureHeight;
+        float u3 = (float) bottomLeftU / (float) textureWidth;
+        float v3 = (float) bottomLeftV / (float) textureHeight;
+        float u4 = (float) bottomRightU / (float) textureWidth;
+        float v4 = (float) bottomRightV / (float) textureHeight;
+
+        RenderSystem.setShader(GameRenderer::getPositionTexShader);
+        BufferBuilder $$10 = Tesselator.getInstance().getBuilder();
+        $$10.begin(VertexFormat.Mode.TRIANGLE_FAN, DefaultVertexFormat.POSITION_TEX);
+        $$10.vertex(matrix, topLeftX, topLeftY, 0.0F).uv(u1, v1).endVertex();
+        $$10.vertex(matrix, bottomLeftX, bottomLeftY, 0.0F).uv(u3, v3).endVertex();
+        $$10.vertex(matrix, bottomRightX, bottomRightY, 0.0F).uv(u4, v4).endVertex();
+        $$10.vertex(matrix, topRightX, topRightY, 0.0F).uv(u2, v2).endVertex();
+        BufferUploader.drawWithShader($$10.end());
+    }
+
+    @Override
+    public void texturedRotatedRect(int topLeftX, int topLeftY, int topRightX, int topRightY, int bottomLeftX, int bottomLeftY, Texture tex, int topLeftU, int topLeftV, int topRightU, int topRightV, int bottomLeftU, int bottomLeftV, int textureWidth, int textureHeight, int color) {
+        RenderSystem.setShaderTexture(0, ((MCTexture) tex).location);
+
+        Matrix4f matrix = pose.last().pose();
+
+        // calculate 4th point
+
+        // vec from top left to bottom left
+        int vec1x = bottomLeftX - topLeftX;
+        int vec1y = bottomLeftY - topLeftY;
+        int bottomRightX = topRightX + vec1x;
+        int bottomRightY = topRightY + vec1y;
+        int vec1u = bottomLeftU - topLeftU;
+        int vec1v = bottomLeftV - topLeftV;
+        int bottomRightU = topRightU + vec1u;
+        int bottomRightV = topRightV + vec1v;
+
+        float u1 = (float) topLeftU / (float) textureWidth;
+        float v1 = (float) topLeftV / (float) textureHeight;
+        float u2 = (float) topRightU / (float) textureWidth;
+        float v2 = (float) topRightV / (float) textureHeight;
+        float u3 = (float) bottomLeftU / (float) textureWidth;
+        float v3 = (float) bottomLeftV / (float) textureHeight;
+        float u4 = (float) bottomRightU / (float) textureWidth;
+        float v4 = (float) bottomRightV / (float) textureHeight;
+
+        RenderSystem.setShader(GameRenderer::getPositionColorTexShader);
+        BufferBuilder $$10 = Tesselator.getInstance().getBuilder();
+        $$10.begin(VertexFormat.Mode.TRIANGLE_FAN, DefaultVertexFormat.POSITION_COLOR_TEX);
+        $$10.vertex(matrix, topLeftX, topLeftY, 0.0F).color(color).uv(u1, v1).endVertex();
+        $$10.vertex(matrix, bottomLeftX, bottomLeftY, 0.0F).color(color).uv(u3, v3).endVertex();
+        $$10.vertex(matrix, bottomRightX, bottomRightY, 0.0F).color(color).uv(u4, v4).endVertex();
+        $$10.vertex(matrix, topRightX, topRightY, 0.0F).color(color).uv(u2, v2).endVertex();
+        BufferUploader.drawWithShader($$10.end());
+    }
+
+    @Override
+    public void rotatedTextureRect(int x, int y, int width, int height, Texture tex, int topLeftU, int topLeftV, int topRightU, int topRightV, int bottomLeftU, int bottomLeftV, int textureWidth, int textureHeight, int color) {
+        RenderSystem.setShaderTexture(0, ((MCTexture) tex).location);
+
+        Matrix4f matrix = pose.last().pose();
+
+        float u1 = (float) topLeftU / (float) textureWidth;
+        float v1 = (float) topLeftV / (float) textureHeight;
+        float u2 = (float) topRightU / (float) textureWidth;
+        float v2 = (float) topRightV / (float) textureHeight;
+        float u3 = (float) bottomLeftU / (float) textureWidth;
+        float v3 = (float) bottomLeftV / (float) textureHeight;
+
+        // calculate 4th point
+        float vec1u = topRightU - topLeftU;
+        float vec1v = topRightV - topLeftV;
+        float u4 = u3 + vec1u / (float) textureWidth;
+        float v4 = v3 + vec1v / (float) textureHeight;
+
+        RenderSystem.setShader(GameRenderer::getPositionColorTexShader);
+        BufferBuilder $$10 = Tesselator.getInstance().getBuilder();
+        $$10.begin(VertexFormat.Mode.TRIANGLE_FAN, DefaultVertexFormat.POSITION_COLOR_TEX);
+        $$10.vertex(matrix, x, y, 0.0F).color(color).uv(u1, v1).endVertex();
+        $$10.vertex(matrix, x, y + height, 0.0F).color(color).uv(u3, v3).endVertex();
+        $$10.vertex(matrix, x + width, y + height, 0.0F).color(color).uv(u4, v4).endVertex();
+        $$10.vertex(matrix, x + width, y, 0.0F).color(color).uv(u2, v2).endVertex();
         BufferUploader.drawWithShader($$10.end());
     }
 
@@ -252,7 +497,26 @@ public class MCRenderer extends GuiComponent implements Renderer<MCTexture<Abstr
     }
 
     @Override
+    public List<String> wrapString(String text, int width, boolean wordWrap) {
+        List<String> lines = new ArrayList<>();
+        int curWidth = 0;
+        String remaining = text;
+        while (!remaining.isEmpty()) {
+            String trim = trimToWidth(remaining, width);
+            if (wordWrap) {
+                int lastSpace = trim.lastIndexOf(' ');
+                if (lastSpace > 0)
+                    trim = trim.substring(0, lastSpace);
+            }
+            lines.add(trim);
+            remaining = remaining.substring(trim.length());
+        }
+        return lines;
+    }
+
+    @Override
     public void line(int x1, int y1, int x2, int y2, int color) {
+        line(x1, y1, x2, y2, color, 1);
     }
 
     @Override

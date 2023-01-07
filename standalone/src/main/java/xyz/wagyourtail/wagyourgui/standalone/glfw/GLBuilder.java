@@ -27,7 +27,7 @@ public abstract class GLBuilder {
 
     public abstract GLBuilder color(int rgb, float a);
 
-    public abstract GLBuilder color(int rgba);
+    public abstract GLBuilder color(int argb);
 
     public abstract GLBuilder uv(float u, float v);
 

@@ -1,16 +1,13 @@
 package xyz.wagyourtail.wagyourgui.api.overlay;
 
 import xyz.wagyourtail.wagyourgui.api.container.ElementContainer;
-import xyz.wagyourtail.wagyourgui.api.element.Disableable;
-import xyz.wagyourtail.wagyourgui.api.element.Element;
-import xyz.wagyourtail.wagyourgui.api.element.Interactable;
-import xyz.wagyourtail.wagyourgui.api.element.Renderable;
+import xyz.wagyourtail.wagyourgui.api.element.*;
 
 import java.util.Deque;
 import java.util.Iterator;
 import java.util.LinkedList;
 
-public abstract class OverlayElementContainer extends Overlay implements ElementContainer {
+public abstract class OverlayElementContainer extends Overlay implements ElementContainer, Ticking {
 
     private final Deque<Element> elements = new LinkedList<>();
     private Interactable focusedElement = null;
@@ -121,6 +118,15 @@ public abstract class OverlayElementContainer extends Overlay implements Element
             return focusedElement.onKeyReleased(keyCode, scanCode, modifiers);
         }
         return false;
+    }
+
+    @Override
+    public void onTick() {
+        for (Element e : elements) {
+            if (e instanceof Ticking) {
+                ((Ticking) e).onTick();
+            }
+        }
     }
 
     @Override

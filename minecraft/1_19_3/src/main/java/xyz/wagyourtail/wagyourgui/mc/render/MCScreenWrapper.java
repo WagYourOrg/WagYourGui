@@ -4,6 +4,8 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.network.chat.Component;
 import xyz.wagyourtail.wagyourgui.api.screen.Screen;
 
+import javax.annotation.ParametersAreNonnullByDefault;
+
 public class MCScreenWrapper extends net.minecraft.client.gui.screens.Screen {
     private final Screen screen;
 
@@ -11,7 +13,10 @@ public class MCScreenWrapper extends net.minecraft.client.gui.screens.Screen {
         super(Component.empty());
         this.screen = screen;
         if (!screen.isParentGuest()) {
-            screen.setOpenParent(() -> minecraft.setScreen((net.minecraft.client.gui.screens.Screen) screen.getParentHost()));
+            screen.setOpenParent(() -> {
+                assert minecraft != null;
+                minecraft.setScreen((net.minecraft.client.gui.screens.Screen) screen.getParentHost());
+            });
         }
     }
 
@@ -20,7 +25,13 @@ public class MCScreenWrapper extends net.minecraft.client.gui.screens.Screen {
     }
 
     @Override
+    public void tick() {
+        screen.onTick();
+    }
+
+    @Override
     protected void init() {
+        assert minecraft != null;
         screen.onInit(width, height, minecraft.level != null);
     }
 
@@ -73,6 +84,7 @@ public class MCScreenWrapper extends net.minecraft.client.gui.screens.Screen {
     }
 
     @Override
+    @ParametersAreNonnullByDefault
     public void render(PoseStack $$0, int $$1, int $$2, float $$3) {
         MCRenderer.INSTANCE.bindMatrixStack($$0);
         screen.onRender($$1, $$2);

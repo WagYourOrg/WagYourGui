@@ -90,6 +90,7 @@ public class GLFWSession implements ResizeListener, MouseListener, KeyListener {
 
             GLFWVidMode vidmode = glfwGetVideoMode(glfwGetPrimaryMonitor());
 
+            assert vidmode != null;
             glfwSetWindowPos(
                     window.handle,
                     (vidmode.width() - pWidth.get(0)) / 2,
@@ -118,6 +119,8 @@ public class GLFWSession implements ResizeListener, MouseListener, KeyListener {
         long timeNanos = System.nanoTime();
         int frameCount = 0;
 
+        long lastTime = System.nanoTime();
+
         while (!glfwWindowShouldClose(window.handle)) {
             ++frameCount;
             if (frameCount % 10 == 0) {
@@ -125,6 +128,13 @@ public class GLFWSession implements ResizeListener, MouseListener, KeyListener {
                 timeNanos = System.nanoTime();
                 frameCount = 0;
             }
+
+            // every 50 ms
+            if (System.nanoTime() - lastTime > 50000000L) {
+                lastTime = System.nanoTime();
+                screen.onTick();
+            }
+
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
             GL14.glBlendFuncSeparate(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA, GL_ONE, GL_ZERO);
 
